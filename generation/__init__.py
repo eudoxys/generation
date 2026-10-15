@@ -22,6 +22,8 @@ Package information
 
     - [pandas](https://pypi.org/project/pandas/)
     - [eia](https://github.com/eudoxys/eia/)
+    - [geohash](https://github.com/eudoxys/geohash/)
+    - [numpy](https://pypi.org/project/numpy/)
 """
 
 from generation.generation import Generation
