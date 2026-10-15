@@ -69,10 +69,8 @@ def main(
     try:
 
         # support direct call to main
-        if args:
-            sys.argv = [__file__] + list(args)
-        if kwargs:
-            sys.argv += [f"--{x}={y}" for x,y in kwargs.items()]
+        argv = list(args) if args or kwargs else sys.argv[1:]
+        argv += [f"--{x}={y}" for x,y in kwargs.items()]
 
         # setup command line parser
         parser = argparse.ArgumentParser(
@@ -113,7 +111,7 @@ def main(
             help="enable debug traceback on exceptions")
 
         # parse arguments
-        args = parser.parse_args()
+        args = parser.parse_args(argv)
 
         # setup warning handling
         if not args.warning:
