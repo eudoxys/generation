@@ -7,7 +7,7 @@ Example
 
 To select the generators in California in August 2020 run the following:
 
-    from generator import Generator
+    from generation import Generation
     Generation(2020,8,states="CA")
 
 which outputs the following
@@ -27,7 +27,6 @@ which outputs the following
     2020-08-01 00:00:00+00:00   CISO          Tulare  ... -119.4302   9q7pfm
 
     [2690 rows x 15 columns]
-    [Finished in 3.1s]
 """
 
 import logging
@@ -44,7 +43,7 @@ class Generation(pd.DataFrame):
     Columns
     -------
 
-    - `state`: state in which plant is locatedd
+    - `state`: state in which plant is located
 
     - `region`: balance authority region name
 
@@ -107,9 +106,9 @@ class Generation(pd.DataFrame):
 
           - `year`: year from which to load data frame
 
-          - `month`: month(s) from which to load data frame
+          - `months`: month(s) from which to load data frame
 
-          - `state`: state(s) to include in data frame
+          - `states`: state(s) to include in data frame
         """
 
         # check months
