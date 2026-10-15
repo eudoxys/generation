@@ -11,7 +11,7 @@ dependencies = {file=["requirements.txt"]}
 [project]
 name = "generation"
 version = "0.0.0"
-description = "US electric generation model"
+description = "Generation fleet data accessor"
 authors = [
     {name = "David P. Chassin <dchassin@eudoxys.com>"},
     ]
