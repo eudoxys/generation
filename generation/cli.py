@@ -51,8 +51,8 @@ E_SYNTAX = 2
 """Exit code on syntax error"""
 
 def main(
-    *args:list[str],
-    **kwargs:[dict[str,str]],
+    *args:str,
+    **kwargs:str,
     ) -> int:
     """Generator data accessor command line processor
 
