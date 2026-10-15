@@ -31,6 +31,7 @@ which outputs the following
 """
 
 import logging
+import numbers
 
 import pandas as pd
 import numpy as np
@@ -115,11 +116,12 @@ class Generation(pd.DataFrame):
         # check months
         if months is None:
             months = range(1,13)
-        elif isinstance(months,int):
+        elif isinstance(months,numbers.Integral):
             months = [months]
         else:
             months = [x for x in months]
-        assert np.array([isinstance(x,int) for x in months]).all(), f"{months=} contains non-integer values"
+        assert all(isinstance(x,numbers.Integral) and not isinstance(x,bool) for x in months), f"{months=} contains non-integer values"
+        months = [int(x) for x in months]
         assert np.array([1<=x<=12 for x in months]).all(), f"{months=} contains invalid month value(s)"
         
         # compile results
