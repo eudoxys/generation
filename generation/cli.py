@@ -34,6 +34,7 @@ which outputs the following
 import os
 import sys
 import argparse
+import gzip
 import warnings
 import logging
 
@@ -141,12 +142,25 @@ def main(
                 print(data)
             elif args.format == "csv":
                 print(data.to_csv(index=True,header=True))
-        elif args.output.endswith(".csv"):
-            data.to_csv(args.output,index=True,header=True)
-        elif args.output.endswith(".csv.gz"):
-            data.to_csv(args.output,compression="gzip",index=True,header=True)
+            elif args.format == "gzip":
+                sys.stdout.flush()
+                sys.stdout.buffer.write(
+                    gzip.compress(data.to_csv(index=True,header=True).encode()))
+                sys.stdout.buffer.flush()
         else:
-            raise ValueError(f"output={args.output} is not valid")
+            if args.output.endswith(".csv.gz"):
+                ext = "gzip"
+            elif args.output.endswith(".csv"):
+                ext = "csv"
+            else:
+                ext = None
+            if args.format and ext and args.format != ext:
+                raise ValueError(f"format={args.format} conflicts with output={args.output}")
+            fmt = args.format or ext
+            if fmt is None:
+                raise ValueError(f"output={args.output} is not valid (use .csv, .csv.gz, or --format)")
+            data.to_csv(args.output,index=True,header=True,
+                compression="gzip" if fmt == "gzip" else None)
 
         return E_OK
 
