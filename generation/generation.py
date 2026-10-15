@@ -119,8 +119,10 @@ class Generation(pd.DataFrame):
             months = [months]
         else:
             months = [x for x in months]
-        assert np.array([isinstance(x,int) for x in months]).all(), f"{months=} contains non-integer values"
-        assert np.array([1<=x<=12 for x in months]).all(), f"{months=} contains invalid month value(s)"
+        if not all(isinstance(x,int) for x in months):
+            raise TypeError(f"{months=} contains non-integer values")
+        if not all(1<=x<=12 for x in months):
+            raise ValueError(f"{months=} contains invalid month value(s)")
         
         # compile results
         result = []
@@ -162,8 +164,10 @@ class Generation(pd.DataFrame):
         else:
 
             # list of states selected
-            assert isinstance(states,list), f"{states=} is not valid"
-            assert np.array([isinstance(x,str) for x in states]).all(), f"{states=} contain a non-string value"
+            if not isinstance(states,list):
+                raise TypeError(f"{states=} is not valid")
+            if not all(isinstance(x,str) for x in states):
+                raise TypeError(f"{states=} contain a non-string value")
             result.set_index(["state","timestamp"],inplace=True)
             super().__init__(result.loc[states,:])
 
