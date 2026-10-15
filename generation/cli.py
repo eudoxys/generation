@@ -126,7 +126,7 @@ def main(
 
         # enable debug output
         if args.debug:
-            logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
+            logging.basicConfig(level=logging.DEBUG)
 
         # get data
         data = Generation(
