@@ -156,7 +156,7 @@ def main(
         if getattr(args,"debug"):
             raise
 
-        print(f"ERROR [loads]: {err}")
+        print(f"ERROR [generation]: {err}",file=sys.stderr)
         return E_FAILED
 
 if __name__ == "__main__":
