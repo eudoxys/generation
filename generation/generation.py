@@ -31,6 +31,7 @@ which outputs the following
 """
 
 import logging
+import warnings
 
 import pandas as pd
 import numpy as np
@@ -147,6 +148,13 @@ class Generation(pd.DataFrame):
         # set geohashes
         result["geohash"] = [geohash(x.latitude,x.longitude,6) for _,x in result.iterrows()]
 
+        # warn about requested states that have no generators
+        if states is not None:
+            missing = sorted(set([states] if isinstance(states,str) else states)
+                - set(result["state"]))
+            if missing:
+                warnings.warn(f"no generators found for state(s) {', '.join(map(str,missing))}")
+
         # select desired state (if any)
         if states is None:
 
@@ -157,15 +165,17 @@ class Generation(pd.DataFrame):
 
             # single state selected
             result.set_index(["state","timestamp"],inplace=True)
-            super().__init__(result.loc[states,:])
-        
+            selected = result.index.get_level_values("state") == states
+            super().__init__(result[selected].droplevel("state"))
+
         else:
 
             # list of states selected
             assert isinstance(states,list), f"{states=} is not valid"
             assert np.array([isinstance(x,str) for x in states]).all(), f"{states=} contain a non-string value"
             result.set_index(["state","timestamp"],inplace=True)
-            super().__init__(result.loc[states,:])
+            selected = result.index.get_level_values("state").isin(states)
+            super().__init__(result[selected])
 
 if __name__ == "__main__":
 
