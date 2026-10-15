@@ -153,7 +153,7 @@ def main(
     # pylint: disable=broad-exception-caught
     except Exception as err:
 
-        if getattr(args,"debug"):
+        if getattr(args,"debug",False):
             raise
 
         print(f"ERROR [loads]: {err}")
