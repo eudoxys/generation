@@ -144,8 +144,14 @@ class Generation(pd.DataFrame):
         # assemble results
         result = pd.concat(result).reset_index()
 
+        # drop unwanted states before the geohash calculation
+        if states is not None:
+            wanted = [states] if isinstance(states,str) else states
+            result = result[result["state"].isin(wanted)].copy()
+
         # set geohashes
-        result["geohash"] = [geohash(x.latitude,x.longitude,6) for _,x in result.iterrows()]
+        result["geohash"] = [geohash(lat,lon,6)
+            for lat,lon in zip(result["latitude"],result["longitude"])]
 
         # select desired state (if any)
         if states is None:
