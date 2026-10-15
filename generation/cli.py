@@ -161,4 +161,4 @@ def main(
 
 if __name__ == "__main__":
 
-    main("plot","-d",state="CA",county="Alameda",year=2020,dataset="total")
+    sys.exit(main())
