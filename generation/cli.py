@@ -86,11 +86,13 @@ def main(
             help="year for which to download generation data")
 
         parser.add_argument("month",
+            nargs="?",
             default=None,
             type=int,
             help="month for which to download generation data")
 
         parser.add_argument("states",
+            nargs="?",
             default=None,
             type=str,
             help="(comma separated) state(s) for which to download generation data")
@@ -132,7 +134,7 @@ def main(
         data = Generation(
             year=args.year,
             months=args.month,
-            states=args.states.split(","),
+            states=args.states.split(",") if args.states else None,
             )
 
         # output data
