@@ -32,6 +32,7 @@ which outputs the following
 
 import logging
 import numbers
+import warnings
 
 import pandas as pd
 import numpy as np
@@ -166,7 +167,15 @@ class Generation(pd.DataFrame):
                 states = [states]
             assert isinstance(states,list), f"{states=} is not valid"
             assert np.array([isinstance(x,str) for x in states]).all(), f"{states=} contain a non-string value"
-            result = result.loc[states]
+
+            # warn about requested states that have no generators
+            found = set(result.index.get_level_values("state"))
+            missing = sorted(set(states) - found)
+            if missing:
+                warnings.warn(f"no generators found for state(s) {', '.join(missing)}")
+
+            # select by mask so missing states yield no rows instead of a KeyError
+            result = result[result.index.get_level_values("state").isin(states)]
 
         super().__init__(result)
 
