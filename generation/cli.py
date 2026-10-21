@@ -1,7 +1,8 @@
 """Syntax
 ------
 
-    generator YEAR [MONTH[,MONTH[,...]]] [STATE[,STATE[,...]]]
+    generation YEAR [MONTH[,MONTH[,...]]] [STATE[,STATE[,...]]]
+        [-o|--output FILE] [-f|--format {csv,gzip}]
         [-h|--help] [-w|--warning] [-d|--debug]
 
 Examples
@@ -10,7 +11,7 @@ Examples
 To download the generation data for California in August 2020 run the command
 
 
-    generator 2020 8 CA
+    generation 2020 8 CA
 
 which outputs the following
 
@@ -66,12 +67,14 @@ def main(
     *args:str,
     **kwargs:str,
     ) -> int:
-    """Generator data accessor command line processor
+    """Generation data accessor command line processor
 
     Arguments
     ---------
 
-      - `*args`: command line arguments (`None` reverts to `sys.argv`)
+      - `*args`: command line arguments (none reverts to `sys.argv`)
+
+      - `**kwargs`: options, passed as `--name=value`
 
     Returns
     -------
