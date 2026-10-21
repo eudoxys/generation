@@ -152,7 +152,10 @@ class Generation(pd.DataFrame):
         result = pd.concat(result).reset_index()
 
         # set geohashes
-        result["geohash"] = [geohash(x.latitude,x.longitude,6) for _,x in result.iterrows()]
+        result["geohash"] = [
+            None if pd.isna(x.latitude) or pd.isna(x.longitude)
+            else geohash(x.latitude,x.longitude,6)
+            for _,x in result.iterrows()]
 
         # set index
         result.set_index(["state","county","geohash","timestamp"],inplace=True)
