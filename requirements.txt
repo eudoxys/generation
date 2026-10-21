@@ -1,4 +1,4 @@
-marimo
+numpy
 pandas
 
 eia @ git+https://github.com/eudoxys/eia
