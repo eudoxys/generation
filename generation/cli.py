@@ -51,6 +51,17 @@ E_FAILED = 1
 E_SYNTAX = 2
 """Exit code on syntax error"""
 
+def _months(text:str) -> list[int]:
+    """Parse a comma-separated list of months"""
+    try:
+        months = [int(x) for x in text.split(",")]
+    except ValueError as err:
+        raise argparse.ArgumentTypeError(
+            f"{text!r} is not a comma-separated list of months") from err
+    if not all(1 <= x <= 12 for x in months):
+        raise argparse.ArgumentTypeError(f"{text!r} contains a month outside 1-12")
+    return months
+
 def main(
     *args:list[str],
     **kwargs:[dict[str,str]],
@@ -87,11 +98,13 @@ def main(
             help="year for which to download generation data")
 
         parser.add_argument("month",
+            nargs="?",
             default=None,
-            type=int,
-            help="month for which to download generation data")
+            type=_months,
+            help="(comma separated) month(s) for which to download generation data")
 
         parser.add_argument("states",
+            nargs="?",
             default=None,
             type=str,
             help="(comma separated) state(s) for which to download generation data")
@@ -133,7 +146,7 @@ def main(
         data = Generation(
             year=args.year,
             months=args.month,
-            states=args.states.split(","),
+            states=args.states.split(",") if args.states else None,
             )
 
         # output data
