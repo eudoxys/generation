@@ -2,4 +2,5 @@ numpy
 pandas
 
 eia @ git+https://github.com/eudoxys/eia
+cache @ git+https://github.com/eudoxys/cache
 geohash @ git+https://github.com/eudoxys/geohash
