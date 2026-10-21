@@ -31,6 +31,8 @@ which outputs the following
 """
 
 import logging
+import numbers
+import warnings
 
 import pandas as pd
 import numpy as np
@@ -41,14 +43,21 @@ from geohash import geohash
 class Generation(pd.DataFrame):
     """Generation fleet data frame
 
+    Index
+    -----
+
+    - `state`: state in which plant is located
+
+    - `county`: county name
+
+    - `geohash`: plant location geohash
+
+    - `timestamp`: first day of the Form 860m month
+
     Columns
     -------
 
-    - `state`: state in which plant is locatedd
-
     - `region`: balance authority region name
-
-    - `county`: county name
 
     - `sector`: sector name
 
@@ -73,8 +82,6 @@ class Generation(pd.DataFrame):
     - `latitude`: plant location latitude
 
     - `longitude`: plant location longitude
-
-    - `geohash`: plant location geohash
     """
 
     COLUMNS = {
@@ -115,12 +122,13 @@ class Generation(pd.DataFrame):
         # check months
         if months is None:
             months = range(1,13)
-        elif isinstance(months,int):
+        elif isinstance(months,numbers.Integral):
             months = [months]
         else:
             months = [x for x in months]
-        if not all(isinstance(x,int) for x in months):
+        if not all(isinstance(x,numbers.Integral) and not isinstance(x,bool) for x in months):
             raise TypeError(f"{months=} contains non-integer values")
+        months = [int(x) for x in months]
         if not all(1<=x<=12 for x in months):
             raise ValueError(f"{months=} contains invalid month value(s)")
         
@@ -147,29 +155,33 @@ class Generation(pd.DataFrame):
         result = pd.concat(result).reset_index()
 
         # set geohashes
-        result["geohash"] = [geohash(x.latitude,x.longitude,6) for _,x in result.iterrows()]
+        result["geohash"] = [
+            None if pd.isna(x.latitude) or pd.isna(x.longitude)
+            else geohash(x.latitude,x.longitude,6)
+            for _,x in result.iterrows()]
 
-        # select desired state (if any)
-        if states is None:
+        # set index
+        result.set_index(["state","county","geohash","timestamp"],inplace=True)
 
-            # no state selected
-            super().__init__(result.set_index("timestamp"))
-
-        elif isinstance(states,str):
-
-            # single state selected
-            result.set_index(["state","timestamp"],inplace=True)
-            super().__init__(result.loc[states,:])
-        
-        else:
-
-            # list of states selected
+        # select desired state(s) (if any)
+        if states is not None:
+            if isinstance(states,str):
+                states = [states]
             if not isinstance(states,list):
                 raise TypeError(f"{states=} is not valid")
             if not all(isinstance(x,str) for x in states):
                 raise TypeError(f"{states=} contain a non-string value")
-            result.set_index(["state","timestamp"],inplace=True)
-            super().__init__(result.loc[states,:])
+
+            # warn about requested states that have no generators
+            found = set(result.index.get_level_values("state"))
+            missing = sorted(set(states) - found)
+            if missing:
+                warnings.warn(f"no generators found for state(s) {', '.join(missing)}")
+
+            # select by mask so missing states yield no rows instead of a KeyError
+            result = result[result.index.get_level_values("state").isin(states)]
+
+        super().__init__(result)
 
 if __name__ == "__main__":
 
