@@ -154,16 +154,7 @@ class Generation(pd.DataFrame):
         # assemble results
         result = pd.concat(result).reset_index()
 
-        # set geohashes
-        result["geohash"] = [
-            None if pd.isna(x.latitude) or pd.isna(x.longitude)
-            else geohash(x.latitude,x.longitude,6)
-            for _,x in result.iterrows()]
-
-        # set index
-        result.set_index(["state","county","geohash","timestamp"],inplace=True)
-
-        # select desired state(s) (if any)
+        # validate requested state(s) (if any)
         if states is not None:
             if isinstance(states,str):
                 states = [states]
@@ -173,13 +164,21 @@ class Generation(pd.DataFrame):
                 raise TypeError(f"{states=} contain a non-string value")
 
             # warn about requested states that have no generators
-            found = set(result.index.get_level_values("state"))
-            missing = sorted(set(states) - found)
+            missing = sorted(set(states) - set(result["state"]))
             if missing:
                 warnings.warn(f"no generators found for state(s) {', '.join(missing)}")
 
-            # select by mask so missing states yield no rows instead of a KeyError
-            result = result[result.index.get_level_values("state").isin(states)]
+            # drop unwanted states before the geohash calculation; selecting by
+            # mask means missing states yield no rows instead of a KeyError
+            result = result[result["state"].isin(states)].copy()
+
+        # set geohashes
+        result["geohash"] = [
+            None if pd.isna(lat) or pd.isna(lon) else geohash(lat,lon,6)
+            for lat,lon in zip(result["latitude"],result["longitude"])]
+
+        # set index
+        result.set_index(["state","county","geohash","timestamp"],inplace=True)
 
         super().__init__(result)
 
