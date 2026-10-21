@@ -53,8 +53,20 @@ def test_geohash():
 
 @pytest.mark.parametrize("months", [0, 13, [8, 13]])
 def test_invalid_month(months):
-    with pytest.raises((AssertionError, ValueError)):
+    with pytest.raises(ValueError):
         Generation(2020, months)
+
+
+@pytest.mark.parametrize("months", [8.0, True, ["8"]])
+def test_non_integer_month(months):
+    with pytest.raises(TypeError):
+        Generation(2020, months)
+
+
+@pytest.mark.parametrize("states", [("CA",), ["CA", 1]])
+def test_invalid_states(states):
+    with pytest.raises(TypeError):
+        Generation(2020, 8, states=states)
 
 
 def test_cli_csv_file(tmp_path):
