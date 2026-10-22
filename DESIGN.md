@@ -1,6 +1,6 @@
-# eudoxys/generation — package design (draft 4)
+# eudoxys/generation — package design (draft 5)
 
-Status: design agreed, 2026-10-21
+Status: design agreed, 2026-10-21; module structure revised 2026-10-21
 
 ## Purpose
 
@@ -22,13 +22,16 @@ available month.
 | 5 | Long tables are sparse; unstacked (wide) totals fill missing with 0 |
 | 6 | Output format: `.csv` if <100 MB, else `.csv.gz` if <100 MB, else `.parquet` |
 | 7 | Counties are keyed by centroid `geohash` from `eudoxys/fips`, not FIPS |
-| 8 | Keep the existing `Generation` class name and module (`generation.py`) |
+| 8 | The unit inventory module is `fleet.py` (class `Fleet`, formerly `Generation` in `generation.py`) |
 | 9 | The CEMS loader lives in this package (`cems.py`) |
 | 10 | Plants carry two flags: `dispatchable` and `agc`. Nuclear is dispatchable without AGC |
 | 11 | Nuclear backfill uses NRC daily reactor power status |
 | 12 | No backfill acceptance test yet; review the backfilled values first |
 | 13 | Power columns keep the `_MW` suffix |
 | 14 | Default `agc` assignments accepted for now |
+| 15 | One module per category; `dispatchable.py` and `nondispatchable.py` combine categories; `total.py` combines both |
+| 16 | Every generation data frame is constructed as `Class(state,county,year)` and returns hourly MW for the county |
+| 17 | A data frame built from other data frames keeps a column for each contributor and adds a total `_MW` column |
 
 ## Conventions inherited from `eudoxys/loads`
 
@@ -38,41 +41,69 @@ available month.
 - Hourly index named `timestamp`, tz-aware UTC.
 - Power columns use the `_MW` suffix. An hourly mean MW equals MWh for that
   hour, so `_MW` is used instead of `_MWh` for consistency with `loads`.
-- Column names are lowercase, matching the existing `Generation` class.
+- Column names are lowercase, matching the `Fleet` class.
 - House style: no spaces after commas in calls, pdoc docstrings, `_logger`.
 
 ## Module layout
 
 ```
 generation/
-  generation.py     Generation: unit inventory from EIA-860M (existing class,
-                    extended with fuel category, dispatchable and agc columns)
-  plants.py         Plants: plant -> county geohash crosswalk and plant flags
+  fleet.py          Fleet: unit inventory from EIA-860M, Fleet(state,county,year)
   fuels.py          EIA energy-source/prime-mover codes -> 12 categories,
-                    default dispatchable/agc flags, and 930 roll-up
+                    dispatchable split, and 930 shaping code per category
+  category.py       Category (plant-built) and Combination (frame-built) base
+                    classes, and the shaping method
+  # dispatchable categories
+  coal.py           Coal
+  natural_gas.py    NaturalGas
+  oil.py            Oil
+  nuclear.py        Nuclear
+  hydro.py          Hydro (conventional)
+  geothermal.py     Geothermal
+  biomass.py        Biomass
+  battery_storage.py BatteryStorage (signed; may be negative)
+  pumped_storage.py PumpedStorage (signed; may be negative)
+  other.py          Other
+  # non-dispatchable categories
+  solar.py          Solar (utility-scale PV and solar thermal)
+  wind.py           Wind (onshore and offshore)
+  # combinations
+  dispatchable.py   Dispatchable: the 10 dispatchable categories
+  nondispatchable.py Nondispatchable: solar and wind
+  total.py          Total: Dispatchable + Nondispatchable
+  cli.py            `generation YEAR [MONTH] [STATE] [-C COUNTY] [-D DATASET] ...`
+  # planned
+  plants.py         plant -> county geohash crosswalk and plant flags
   cems.py           EPA CAMPD hourly unit gross load
   nrc.py            NRC daily power reactor status (nuclear backfill)
-  # dispatchable
-  thermal.py        coal, natural_gas, oil, biomass, geothermal, other
-                    (CEMS-measured where available, shaped otherwise)
-  nuclear.py        nuclear (monthly 923, shaped by 930 NUC or NRC status)
-  hydro.py          conventional hydro
-  storage.py        battery_storage, pumped_storage (signed; may be negative)
-  # non-dispatchable
-  solar.py          utility-scale PV and solar thermal
-  wind.py           onshore and offshore wind
-  # assembly
   backfill.py       Jan–Jun 2018 hourly shapes (see below)
-  total.py          Total: assembles all types -> county-hour-fuel long table
   validate.py       reconciliation against 923 (monthly) and 930 (hourly BA)
   io.py             save()/load() implementing the size-based format rule
-  cli.py            `generation print|save ...`
 ```
 
-Each type module exposes one `pd.DataFrame` subclass that returns
-**plant-hour** estimates. `Total` aggregates them to county-hour-fuel.
-`Total(...).dispatchable()`, `.nondispatchable()` and `.agc()` filter on
-the plant flags.
+### Constructor and columns
+
+Every generation data frame has the same constructor,
+
+```python
+Class(state:str,county:str,year:int,*,refresh:bool=False)
+```
+
+and returns one row per UTC hour-beginning `timestamp` of the year.
+
+| class | columns |
+|---|---|
+| category, e.g. `Coal` | `plant_{id}_MW` per contributing plant, `coal_MW` |
+| `Dispatchable` | `coal_MW` … `other_MW` (10 categories), `dispatchable_MW` |
+| `Nondispatchable` | `solar_MW`, `wind_MW`, `nondispatchable_MW` |
+| `Total` | all `Dispatchable` and `Nondispatchable` columns, `total_MW` |
+
+A combination keeps the total column of each category it combines and all
+columns of each combination it combines, then adds its own total. Category
+frames are cached on disk (`eudoxys/cache`, `generation/0/{ST}/{county}/{year}/{category}.csv.gz`).
+
+The county-hour-fuel long table, plant flags and wide multi-county tables
+described below are assembled from these per-county frames.
 
 ## Plant flags: `dispatchable` and `agc`
 
