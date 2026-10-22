@@ -71,6 +71,16 @@ Form 930 hourly data requires an EIA API key in `~/.eia/api_key` or
 `EIA_API_KEY`. Without it, or before July 2018, monthly energy is spread
 evenly over the hours of the month.
 
+## Reviewing generation data
+
+The marimo notebook `generation/_review/review_generation_marimo.py` shows the
+`Total` data of a county as hourly, monthly and daily-profile plots with
+summary statistics. Run it with
+
+```
+marimo edit generation/_review/review_generation_marimo.py
+```
+
 ## Fleet data
 
 Each row of `Fleet` is one operating generating unit in the given month.

@@ -1,5 +1,7 @@
 numpy
 pandas
+matplotlib
+marimo
 
 eia @ git+https://github.com/eudoxys/eia
 cache @ git+https://github.com/eudoxys/cache
