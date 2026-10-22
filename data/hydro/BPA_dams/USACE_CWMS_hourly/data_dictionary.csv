@@ -1,0 +1,14 @@
+column,description,unit,cwms_parameter,dams_with_data
+datetime_utc,"Timestamp (UTC, hour-ending)",,,all 14
+power_MW,"Plant total generation, hourly",MW,Power.Total.1Hour.1Hour,all 14
+power_MW_adjust,"Plant total generation after correcting obvious recording errors: identical to power_MW except 7 hours, listed in BPA_dams/power_MW_adjustments.csv. Added by the data compiler.",MW,(derived from power_MW),all 14
+station_service_MW,"Station service (plant auxiliary) power, hourly",MW,Power-StationService.Total.1Hour.1Hour,ALF BON CHJ DWR GCL HGH IHR JDA LGS LWG LMN MCN TDA
+spinning_reserve_MW,"Spinning reserve carried by the plant, instantaneous at the hour",MW,Power-SpinningReserve.Inst.1Hour.0,ALF BON CHJ GCL HGH JDA LIB LWG TDA
+capacity_available_MW,"Available generating capacity, hourly",MW,Power-Capacity-Avail.Total.1Hour.1Hour,GCL
+outflow_kcfs,"Total outflow (generation + spill + other), hourly average","kcfs (1,000 cubic feet per second)",Flow-Out.Ave.1Hour.1Hour,all 14
+genflow_kcfs,"Flow through turbines (powerhouse flow), hourly average","kcfs (1,000 cubic feet per second)",Flow-Gen.Ave.1Hour.1Hour,all 14
+spill_kcfs,"Spillway flow, hourly average","kcfs (1,000 cubic feet per second)",Flow-Spill.Ave.1Hour.1Hour,all 14
+inflow_kcfs,"Reservoir inflow, hourly average","kcfs (1,000 cubic feet per second)",Flow-In.Ave.1Hour.1Hour,DWR
+forebay_elev_ft,"Forebay (reservoir) water surface elevation, instantaneous at the hour",ft,Elev-Forebay.Inst.1Hour.0,all 14
+tailwater_elev_ft,"Tailwater water surface elevation, instantaneous at the hour",ft,Elev-Tailwater.Inst.1Hour.0,all 14
+storage_kaf,"Reservoir storage, instantaneous at the hour","kaf (1,000 acre-feet)",Stor.Inst.1Hour.0,BON CHJ DWR GCL HGH IHR LIB LGS LWG LMN
