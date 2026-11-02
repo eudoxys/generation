@@ -43,6 +43,8 @@ import numpy as np
 from eia import Form860m
 from geohash import geohash
 
+_logger = logging.getLogger(__file__)
+
 class Fleet(pd.DataFrame):
     """Generation fleet data frame
 

@@ -1,61 +1,95 @@
-# generation
+[![Validation](https://github.com/eudoxys/generation/actions/workflows/validate.yaml/badge.svg)](https://github.com/eudoxys/generation/actions/workflows/validate.yaml)
+[![Documentation](https://github.com/eudoxys/generation/actions/workflows/deploy-pages.yaml/badge.svg)](https://github.com/eudoxys/generation/actions/workflows/deploy-pages.yaml)
 
-Generation fleet data accessor.
+Generation fleet data accessor
 
-`generation` loads the US generator inventory from the EIA Form 860m monthly
-archive (via [eia](https://github.com/eudoxys/eia)) and returns it as a pandas
-data frame of operating units, with plant location, capacity, fuel and prime
-mover, and a 6-character [geohash](https://github.com/eudoxys/geohash) for
-each plant.
+`generation` produces hourly, county-level estimates of US utility-scale net
+generation by energy source category, for modelers who need generation time
+series that line up with [loads](https://github.com/eudoxys/loads). It loads
+the generator inventory from the EIA Form 860m monthly archive (via
+[eia](https://github.com/eudoxys/eia)), assigns each plant's EIA Form 923
+monthly net generation to one of 12 categories, and shapes it into hours with
+the EIA Form 930 hourly generation of the plant's balancing authority. The
+categories are combined into dispatchable, non-dispatchable and total
+generation. See [DESIGN.md](DESIGN.md) for the package design.
 
-It also estimates the hourly net generation of each county by energy source
-category, by shaping EIA Form 923 monthly plant net generation with the EIA
-Form 930 hourly generation of the plant's balancing authority.
+# Documentation
 
-## Installation
+See https://www.eudoxys.com/generation
 
-```
-pip install git+https://github.com/eudoxys/generation
-```
+# Installation
+
+Install using Eudoxys Package Manager:
+
+    pip install --upgrade eudoxys
+    epm install generation
+
+Install using `pip`:
+
+    pip install git+https://github.com/eudoxys/generation
+
+Form 930 hourly data requires an EIA API key in `~/.eia/api_key` or
+`EIA_API_KEY`. Without it, or before July 2018, monthly energy is spread
+evenly over the hours of the month.
+
+# Maintenance
+
+## Update docs
+
+    make docs
+
+## Run tests
+
+    pip install -e . pytest
+    pytest
+
+The tests run offline against small fake EIA tables and take a few seconds.
+See [`generation/_test/README.md`](generation/_test/README.md).
+
+## Cache build
+
+Category frames are cached with [cache](https://github.com/eudoxys/cache)
+under `generation/0/`. Use `-r|--refresh` on the command line, or
+`refresh=True` in Python, to rebuild a county-year.
+
+## Reviewing generation data
+
+The marimo notebook `generation/_review/review_generation_marimo.py` shows the
+`Total` data of a county as hourly, monthly and daily-profile plots with
+summary statistics. See [`generation/_review/README.md`](generation/_review/README.md).
+
+# Examples
 
 ## Command line
 
-```
-generation YEAR [MONTH[,MONTH[,...]]] [STATE[,STATE[,...]]]
-    [-C|--county COUNTY[,COUNTY[,...]]] [-D|--dataset DATASET]
-    [-o|--output FILE] [-f|--format {csv,gzip}] [-r|--refresh]
-    [-h|--help] [-w|--warning] [-d|--debug]
-```
+    generation YEAR [MONTH[,MONTH[,...]]] [STATE[,STATE[,...]]]
+        [-C|--county COUNTY[,COUNTY[,...]]] [-D|--dataset DATASET]
+        [-o|--output FILE] [-f|--format {csv,gzip}] [-r|--refresh]
+        [-h|--help] [-w|--warning] [-d|--debug] [--version]
 
 `DATASET` is `fleet` (the default), `total`, `dispatchable`,
 `nondispatchable`, or one of the 12 categories listed below. The hourly
 datasets need exactly one state and one county.
 
-For example, to save the California fleet for August 2020 as a CSV file:
+To save the California fleet for August 2020 as a CSV file:
 
-```
-generation 2020 8 CA -o ca_2020_08.csv
-```
+    generation 2020 8 CA -o ca_2020_08.csv
 
 To save the 2020 hourly total generation of Kern County CA:
 
-```
-generation 2020 CA -C Kern -D total -o kern_2020.csv
-```
+    generation 2020 CA -C Kern -D total -o kern_2020.csv
 
 Output files ending in `.csv.gz` are written gzip-compressed.
 
 ## Python
 
-```python
-from generation import Fleet, Total, Wind
+    from generation import Fleet, Total, Wind
 
-fleet = Fleet("CA", year=2020, months=8)
-fleet.groupby("fuel")["nameplate_MW"].sum()
+    fleet = Fleet("CA", year=2020, months=8)
+    fleet.groupby("fuel")["nameplate_MW"].sum()
 
-total = Total("CA", "Kern", 2020)    # hourly MW by category
-wind = Wind("CA", "Kern", 2020)      # hourly MW by wind plant
-```
+    total = Total("CA", "Kern", 2020)    # hourly MW by category
+    wind = Wind("CA", "Kern", 2020)      # hourly MW by wind plant
 
 All the hourly data frames are constructed as `Class(state,county,year)`.
 
@@ -66,20 +100,6 @@ All the hourly data frames are constructed as `Class(state,county,year)`.
 | `dispatchable` | `Dispatchable` | 10 dispatchable `{category}_MW`, `dispatchable_MW` |
 | `nondispatchable` | `Nondispatchable` | `solar_MW`, `wind_MW`, `nondispatchable_MW` |
 | `total` | `Total` | all of the above, `total_MW` |
-
-Form 930 hourly data requires an EIA API key in `~/.eia/api_key` or
-`EIA_API_KEY`. Without it, or before July 2018, monthly energy is spread
-evenly over the hours of the month.
-
-## Reviewing generation data
-
-The marimo notebook `generation/_review/review_generation_marimo.py` shows the
-`Total` data of a county as hourly, monthly and daily-profile plots with
-summary statistics. Run it with
-
-```
-marimo edit generation/_review/review_generation_marimo.py
-```
 
 ## Fleet data
 
@@ -104,21 +124,10 @@ Each row of `Fleet` is one operating generating unit in the given month.
 | `latitude`, `longitude` | Plant location |
 | `geohash` | Plant location geohash (6 characters) |
 
-## Documentation
+# License
 
-Full documentation is at https://www.eudoxys.com/generation.
+MIT. See [LICENSE](LICENSE) and [COPYRIGHT.md](COPYRIGHT.md).
 
-## License
-
-MIT. See [LICENSE](LICENSE).
-Generation fleet data accessor
-
-## Design
-
-See [DESIGN.md](DESIGN.md) for the package design: hourly, county-level
-(geohash) net generation by fuel, split into dispatchable/non-dispatchable
-and AGC/non-AGC generation, from January 2018.
-
-## Acknowledgments
+# Acknowledgments
 
 - This material is based on work supported by the U.S. Department of Energy’s Office of Electricity through a grant from the Grid Controls and Communications Division

@@ -1,12 +1,111 @@
 """Generation fleet data accessor
 
+Syntax
+------
+
+    generation YEAR [MONTH[,MONTH[,...]]] [STATE[,STATE[,...]]]
+        [-C|--county COUNTY[,COUNTY[,...]]] [-D|--dataset DATASET]
+        [-o|--output FILE] [-f|--format {csv,gzip}] [-r|--refresh]
+        [-h|--help] [-w|--warning] [-d|--debug] [--version]
+
+Positional arguments
+--------------------
+
+  - `YEAR`: year of the data
+
+  - `MONTH`: (comma separated) month(s); for hourly datasets, selects the
+    hours output
+
+  - `STATE`: (comma separated) state code(s); hourly datasets need exactly one
+
+Optional arguments
+------------------
+
+  - `-C|--county`: (comma separated) county name(s); hourly datasets need
+    exactly one
+
+  - `-D|--dataset`: `fleet` (default), `total`, `dispatchable`,
+    `nondispatchable`, or one of the 12 categories (see `generation.cli`)
+
+  - `-d|--debug`: enable debug logging and traceback on exceptions
+
+  - `-f|--format`: output format, `csv` or `gzip`
+
+  - `-h|--help`: show the help message and exit
+
+  - `-o|--output`: output file name (`.csv` or `.csv.gz`)
+
+  - `-r|--refresh`: rebuild cached category data
+
+  - `-w|--warning`: enable warning messages from python
+
+  - `--version`: show the package version and exit
+
+Description
+-----------
+
 Hourly, county-level models of US utility-scale generation assembled from
 EIA public data. See `DESIGN.md` in the source repository for the package
 design.
 
-All generation data frames are constructed as `Class(state,county,year)` and
-return the hourly net generation (MW) of the county, indexed by UTC
-hour-beginning `timestamp`.
+Given a state, a county and a year, each generation data frame
+`Class(state,county,year)` (e.g., `generation.total.Total`) returns a frame
+that is expected to satisfy:
+
+  1. **Shape.** One row per UTC hour-beginning `timestamp` of the year (8760
+     or 8784 rows); the index is named `timestamp` and is tz-aware UTC.
+
+  2. **Columns.** A `Category` frame has one `plant_{id}_MW` column per
+     contributing plant and a `{category}_MW` total; a `Combination` frame
+     keeps the total column of each category it combines and adds its own
+     total (`dispatchable_MW`, `nondispatchable_MW`, `total_MW`).
+
+  3. **Totals.** Each total column equals the sum of the columns it
+     combines, and the plant columns of a category sum, over each month, to
+     the plants' Form 923 monthly net generation.
+
+  4. **Repeatability.** Category frames are cached with `eudoxys/cache`; a
+     cached frame is returned unchanged unless `refresh=True`.
+
+`generation.fleet.Fleet` returns the Form 860m operating generator
+inventory (one row per unit and month) used to find the plants in a county.
+
+What is not promised
+--------------------
+
+  - CEMS hourly unit loads, NRC reactor status, and the January-June 2018
+    backfill are not implemented yet; those hours use a flat monthly shape.
+
+  - Form 930 hourly shapes need an EIA API key; without one all categories
+    use a flat monthly shape.
+
+  - EIA state-fuel increments (Form 923 plant `99999`) are not located in a
+    county and are not included.
+
+  - AGC flags, county geohash keys and the long `county_generation` output
+    table described in `DESIGN.md` are not implemented yet.
+
+  - Results have not been validated against independent hourly data.
+
+Data
+----
+
+  - `plant_{id}_MW`: hourly mean net generation of plant `id` (MW, equal to
+    MWh in the hour); can be negative.
+
+  - `{category}_MW`: hourly net generation of a category in the county (MW).
+
+  - `dispatchable_MW`, `nondispatchable_MW`, `total_MW`: combined net
+    generation (MW).
+
+```mermaid
+flowchart LR
+    F860M[(Form 860m)] --> Fleet --> Category
+    F923[(Form 923)] --> Category
+    F930[(Form 930)] --> Category
+    Category --> Dispatchable --> Total
+    Category --> Nondispatchable --> Total
+```
 
 Modules
 -------
@@ -69,6 +168,13 @@ Package information
     - [numpy](https://pypi.org/project/numpy/)
 """
 
+try:
+    import importlib.metadata
+    __version__ = importlib.metadata.version("generation")
+except Exception: # pylint: disable=broad-exception-caught
+    __version__ = "dev"
+
+# re-export the public API
 from generation.fleet import Fleet
 from generation.coal import Coal
 from generation.natural_gas import NaturalGas

@@ -1,12 +1,17 @@
-# make documentation
-
-PACKAGE=$(notdir $(CURDIR))
-
+SHELL=/bin/bash
+PACKAGE=$(notdir $(PWD))
 LOGO="https://github.com/eudoxys/.github/blob/main/eudoxys_banner.png?raw=true"
 LINK="https://www.eudoxys.com/"
 
-.PHONY: docs
+all: docs test
 
-docs:
-	pip install --upgrade pdoc
-	pdoc $(PACKAGE)/__init__.py -o $@ --logo $(LOGO) --mermaid --math --logo-link $(LINK)
+docs: $(SOURCE)
+	test -d .venv || python3 -m venv .venv
+	(source .venv/bin/activate ; pip install --upgrade pip)
+	(source .venv/bin/activate ; pip install --upgrade pdoc . -r requirements.txt)
+	(source .venv/bin/activate ; pdoc $(PACKAGE)/__init__.py -o $@ --logo $(LOGO) --math --mermaid --logo-link $(LINK))
+
+test:
+	(source .venv/bin/activate ; pip install -e . pytest ; pytest)
+
+.PHONY: docs test
