@@ -1,14 +1,14 @@
 """Generation fleet data accessor
 
-The `Generation` data frame collects generator fleet data from EIA Form 860m.
+The `Fleet` data frame collects generator fleet data from EIA Form 860m.
 
 Example
 -------
 
 To select the generators in California in August 2020 run the following:
 
-    from generation import Generation
-    Generation(2020,8,states="CA")
+    from generation import Fleet
+    Fleet("CA",year=2020,months=8)
 
 which outputs the following
 
@@ -27,6 +27,10 @@ which outputs the following
     2020-08-01 00:00:00+00:00   CISO          Tulare  ... -119.4302   9q7pfm
 
     [2690 rows x 15 columns]
+
+To select the generators in Kern County CA in August 2020 run the following:
+
+    Fleet("CA","Kern",2020,months=8)
 """
 
 import logging
@@ -39,7 +43,7 @@ import numpy as np
 from eia import Form860m
 from geohash import geohash
 
-class Generation(pd.DataFrame):
+class Fleet(pd.DataFrame):
     """Generation fleet data frame
 
     Index
@@ -102,21 +106,35 @@ class Generation(pd.DataFrame):
         }
 
     def __init__(self,
-        year:int,
+        state:str|list[str]|None=None,
+        county:str|list[str]|None=None,
+        year:int|None=None,
+        *,
         months:int|list[int]|None=None,
-        states:str|list[str]|None=None,
         ):
         """Generation fleet data frame constructor
 
         Arguments
         ---------
 
-          - `year`: year from which to load data frame
+          - `state`: state(s) to include in data frame (`None` includes all
+            states)
 
-          - `months`: month(s) from which to load data frame
+          - `county`: county name(s) to include in data frame (`None`
+            includes all counties)
 
-          - `states`: state(s) to include in data frame
+          - `year`: year from which to load data frame (required)
+
+          - `months`: month(s) from which to load data frame (`None` loads
+            all months)
         """
+
+        # check year
+        if year is None:
+            raise TypeError("year is required")
+        if not isinstance(year,numbers.Integral) or isinstance(year,bool):
+            raise TypeError(f"{year=} is not an integer")
+        year = int(year)
 
         # check months
         if months is None:
@@ -130,7 +148,11 @@ class Generation(pd.DataFrame):
         months = [int(x) for x in months]
         if not all(1<=x<=12 for x in months):
             raise ValueError(f"{months=} contains invalid month value(s)")
-        
+
+        # check states and counties
+        states = self._names(state,"state")
+        counties = self._names(county,"county")
+
         # compile results
         result = []
         for month in months:
@@ -153,23 +175,16 @@ class Generation(pd.DataFrame):
         # assemble results
         result = pd.concat(result).reset_index()
 
-        # validate requested state(s) (if any)
-        if states is not None:
-            if isinstance(states,str):
-                states = [states]
-            if not isinstance(states,list):
-                raise TypeError(f"{states=} is not valid")
-            if not all(isinstance(x,str) for x in states):
-                raise TypeError(f"{states=} contain a non-string value")
-
-            # warn about requested states that have no generators
-            missing = sorted(set(states) - set(result["state"]))
+        # drop unwanted states and counties before the geohash calculation;
+        # selecting by mask means missing values yield no rows instead of a
+        # KeyError
+        for column,values in {"state":states,"county":counties}.items():
+            if values is None:
+                continue
+            missing = sorted(set(values) - set(result[column]))
             if missing:
-                warnings.warn(f"no generators found for state(s) {', '.join(missing)}")
-
-            # drop unwanted states before the geohash calculation; selecting by
-            # mask means missing states yield no rows instead of a KeyError
-            result = result[result["state"].isin(states)].copy()
+                warnings.warn(f"no generators found for {column}(s) {', '.join(missing)}")
+            result = result[result[column].isin(values)].copy()
 
         # set geohashes
         result["geohash"] = [
@@ -181,10 +196,28 @@ class Generation(pd.DataFrame):
 
         super().__init__(result)
 
+    @staticmethod
+    def _names(value:str|list[str]|None,name:str) -> list[str]|None:
+        """@private Check a state or county argument and return it as a list"""
+        if value is None:
+            return None
+        if isinstance(value,str):
+            return [value]
+        if not isinstance(value,list):
+            raise TypeError(f"{name}={value!r} is not valid")
+        if not all(isinstance(x,str) for x in value):
+            raise TypeError(f"{name}={value!r} contains a non-string value")
+        return value
+
+    @classmethod
+    def makeargs(cls,**kwargs) -> dict:
+        """@private Return the kwargs accepted by this class constructor"""
+        return {x:y for x,y in kwargs.items() if x in cls.__init__.__annotations__}
+
 if __name__ == "__main__":
 
     # pd.options.display.width = None
     # pd.options.display.max_columns = None
 
-    test = Generation(2020,8,states="CA")
+    test = Fleet("CA",year=2020,months=8)
     print(test)

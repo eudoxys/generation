@@ -2,8 +2,28 @@
 ------
 
     generation YEAR [MONTH[,MONTH[,...]]] [STATE[,STATE[,...]]]
-        [-o|--output FILE] [-f|--format {csv,gzip}]
+        [-C|--county COUNTY[,COUNTY[,...]]] [-D|--dataset DATASET]
+        [-o|--output FILE] [-f|--format {csv,gzip}] [-r|--refresh]
         [-h|--help] [-w|--warning] [-d|--debug]
+
+The `DATASET` is one of the following:
+
+  - `fleet`: generator inventory (`generation.fleet.Fleet`, the default)
+
+  - `total`: total hourly generation (`generation.total.Total`)
+
+  - `dispatchable`: dispatchable hourly generation
+    (`generation.dispatchable.Dispatchable`)
+
+  - `nondispatchable`: non-dispatchable hourly generation
+    (`generation.nondispatchable.Nondispatchable`)
+
+  - `coal`, `natural_gas`, `oil`, `nuclear`, `hydro`, `geothermal`,
+    `biomass`, `battery_storage`, `pumped_storage`, `other`, `solar`, `wind`:
+    hourly generation of one category (e.g., `generation.coal.Coal`)
+
+The hourly datasets require exactly one `STATE` and one `COUNTY`. For these
+datasets `MONTH` selects the hours output.
 
 Examples
 --------
@@ -30,6 +50,10 @@ which outputs the following
           2020-08-01 00:00:00+00:00   CISO          Tulare         IPP Non-CHP  63993  FTF02  ...       1.0       1.0  36.546901 -119.4302   9q7pfm
 
     [2690 rows x 15 columns]
+
+To save the 2020 hourly total generation of Kern County CA run the command
+
+    generation 2020 CA -C Kern -D total -o kern_2020.csv
 """
 
 import os
@@ -41,7 +65,42 @@ import logging
 
 import pandas as pd
 
-from generation.generation import Generation
+from generation.fleet import Fleet
+from generation.total import Total
+from generation.dispatchable import Dispatchable
+from generation.nondispatchable import Nondispatchable
+from generation.coal import Coal
+from generation.natural_gas import NaturalGas
+from generation.oil import Oil
+from generation.nuclear import Nuclear
+from generation.hydro import Hydro
+from generation.geothermal import Geothermal
+from generation.biomass import Biomass
+from generation.battery_storage import BatteryStorage
+from generation.pumped_storage import PumpedStorage
+from generation.other import Other
+from generation.solar import Solar
+from generation.wind import Wind
+
+DATASETS = {
+    "fleet": Fleet,
+    "total": Total,
+    "dispatchable": Dispatchable,
+    "nondispatchable": Nondispatchable,
+    "coal": Coal,
+    "natural_gas": NaturalGas,
+    "oil": Oil,
+    "nuclear": Nuclear,
+    "hydro": Hydro,
+    "geothermal": Geothermal,
+    "biomass": Biomass,
+    "battery_storage": BatteryStorage,
+    "pumped_storage": PumpedStorage,
+    "other": Other,
+    "solar": Solar,
+    "wind": Wind,
+    }
+"""Datasets available from the command line"""
 
 E_OK = 0
 """Exit code on success"""
@@ -101,7 +160,7 @@ def main(
         parser.add_argument("month",
             nargs="?",
             default=None,
-            type=_months,
+            type=str,
             help="(comma separated) month(s) for which to download generation data")
 
         parser.add_argument("states",
@@ -109,6 +168,20 @@ def main(
             default=None,
             type=str,
             help="(comma separated) state(s) for which to download generation data")
+
+        parser.add_argument("-C","--county",
+            default=None,
+            type=str,
+            help="(comma separated) county name(s) for which to download generation data")
+
+        parser.add_argument("-D","--dataset",
+            default="fleet",
+            choices=list(DATASETS),
+            help="dataset to output (default fleet)")
+
+        parser.add_argument("-r","--refresh",
+            action="store_true",
+            help="refresh cached data")
 
         parser.add_argument("-o","--output",
             default=None,
@@ -130,6 +203,14 @@ def main(
         # parse arguments
         args = parser.parse_args(argv)
 
+        # allow the month to be omitted when states are given
+        if args.month is not None and not args.month.replace(",","").isdigit():
+            if args.states is not None:
+                raise ValueError(f"month={args.month!r} is not valid")
+            args.states,args.month = args.month,None
+        if args.month is not None:
+            args.month = _months(args.month)
+
         # setup warning handling
         if not args.warning:
             warnings.showwarning = lambda *x:print(
@@ -144,11 +225,16 @@ def main(
             logging.basicConfig(level=logging.DEBUG)
 
         # get data
-        data = Generation(
-            year=args.year,
-            months=args.month,
-            states=args.states.split(",") if args.states else None,
-            )
+        states = args.states.split(",") if args.states else None
+        counties = args.county.split(",") if args.county else None
+        if args.dataset == "fleet":
+            data = Fleet(states,counties,args.year,months=args.month)
+        else:
+            if not states or len(states) != 1 or not counties or len(counties) != 1:
+                raise ValueError(f"dataset={args.dataset} requires one state and one county")
+            data = DATASETS[args.dataset](states[0],counties[0],args.year,refresh=args.refresh)
+            if args.month:
+                data = data.loc[data.index.month.isin(args.month)]
 
         # output data
         if args.output is None:
