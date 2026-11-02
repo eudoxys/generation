@@ -1,0 +1,119 @@
+code,dam,column,cwms_tsid,units,hours_with_data,hours_in_period,first,last
+ALF,Albeni Falls,power_MW,ALF.Power.Total.1Hour.1Hour.CBT-RAW,MW,43687,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+ALF,Albeni Falls,station_service_MW,ALF.Power-StationService.Total.1Hour.1Hour.CBT-RAW,MW,43687,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+ALF,Albeni Falls,spinning_reserve_MW,ALF.Power-SpinningReserve.Inst.1Hour.0.CBT-RAW,MW,43686,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+ALF,Albeni Falls,outflow_kcfs,ALF.Flow-Out.Ave.1Hour.1Hour.CBT-REV,kcfs,43808,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+ALF,Albeni Falls,genflow_kcfs,ALF.Flow-Gen.Ave.1Hour.1Hour.CBT-REV,kcfs,43736,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+ALF,Albeni Falls,spill_kcfs,ALF.Flow-Spill.Ave.1Hour.1Hour.CBT-REV,kcfs,43806,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+ALF,Albeni Falls,forebay_elev_ft,ALF.Elev-Forebay.Inst.1Hour.0.CBT-REV,ft,43753,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+ALF,Albeni Falls,tailwater_elev_ft,ALF.Elev-Tailwater.Inst.1Hour.0.CBT-REV,ft,43738,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+BON,Bonneville,power_MW,BON.Power.Total.1Hour.1Hour.CBT-RAW,MW,43821,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+BON,Bonneville,station_service_MW,BON.Power-StationService.Total.1Hour.1Hour.CBT-RAW,MW,43821,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+BON,Bonneville,spinning_reserve_MW,BON.Power-SpinningReserve.Inst.1Hour.0.CBT-RAW,MW,43819,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+BON,Bonneville,outflow_kcfs,BON.Flow-Out.Ave.1Hour.1Hour.CBT-REV,kcfs,43821,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+BON,Bonneville,genflow_kcfs,BON.Flow-Gen.Ave.1Hour.1Hour.CBT-REV,kcfs,43821,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+BON,Bonneville,spill_kcfs,BON.Flow-Spill.Ave.1Hour.1Hour.CBT-REV,kcfs,43821,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+BON,Bonneville,forebay_elev_ft,BON.Elev-Forebay.Inst.1Hour.0.CBT-REV,ft,43821,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+BON,Bonneville,tailwater_elev_ft,BON.Elev-Tailwater.Inst.1Hour.0.CBT-REV,ft,43821,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+BON,Bonneville,storage_kaf,BON.Stor.Inst.1Hour.0.CBT-COMPUTED-REV,kaf,43699,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+CHJ,Chief Joseph,power_MW,CHJ.Power.Total.1Hour.1Hour.CBT-RAW,MW,43824,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+CHJ,Chief Joseph,station_service_MW,CHJ.Power-StationService.Total.1Hour.1Hour.CBT-RAW,MW,43824,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+CHJ,Chief Joseph,spinning_reserve_MW,CHJ.Power-SpinningReserve.Inst.1Hour.0.CBT-RAW,MW,43823,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+CHJ,Chief Joseph,outflow_kcfs,CHJ.Flow-Out.Ave.1Hour.1Hour.CBT-REV,kcfs,43824,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+CHJ,Chief Joseph,genflow_kcfs,CHJ.Flow-Gen.Ave.1Hour.1Hour.CBT-REV,kcfs,43824,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+CHJ,Chief Joseph,spill_kcfs,CHJ.Flow-Spill.Ave.1Hour.1Hour.CBT-REV,kcfs,43824,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+CHJ,Chief Joseph,forebay_elev_ft,CHJ.Elev-Forebay.Inst.1Hour.0.CBT-REV,ft,43824,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+CHJ,Chief Joseph,tailwater_elev_ft,CHJ.Elev-Tailwater.Inst.1Hour.0.CBT-REV,ft,43824,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+CHJ,Chief Joseph,storage_kaf,CHJ.Stor.Inst.1Hour.0.CBT-REV,kaf,43682,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+DWR,Dworshak,power_MW,DWR.Power.Total.1Hour.1Hour.CBT-RAW,MW,43685,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+DWR,Dworshak,station_service_MW,DWR.Power-StationService.Total.1Hour.1Hour.CBT-RAW,MW,43685,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+DWR,Dworshak,outflow_kcfs,DWR.Flow-Out.Ave.1Hour.1Hour.CBT-REV,kcfs,43714,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+DWR,Dworshak,genflow_kcfs,DWR.Flow-Gen.Ave.1Hour.1Hour.CBT-REV,kcfs,43726,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+DWR,Dworshak,spill_kcfs,DWR.Flow-Spill.Ave.1Hour.1Hour.CBT-REV,kcfs,43709,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+DWR,Dworshak,inflow_kcfs,DWR.Flow-In.Ave.1Hour.1Hour.CBT-COMPUTED-REV,kcfs,43365,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+DWR,Dworshak,forebay_elev_ft,DWR.Elev-Forebay.Inst.1Hour.0.CBT-REV,ft,43726,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+DWR,Dworshak,tailwater_elev_ft,DWR.Elev-Tailwater.Inst.1Hour.0.CBT-REV,ft,43726,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+DWR,Dworshak,storage_kaf,DWR.Stor.Inst.1Hour.0.CBT-REV,kaf,43013,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+GCL,Grand Coulee,power_MW,GCL.Power.Total.1Hour.1Hour.CBT-RAW,MW,43824,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+GCL,Grand Coulee,station_service_MW,GCL.Power-StationService.Total.1Hour.1Hour.CBT-RAW,MW,43824,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+GCL,Grand Coulee,spinning_reserve_MW,GCL.Power-SpinningReserve.Inst.1Hour.0.CBT-RAW,MW,43824,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+GCL,Grand Coulee,capacity_available_MW,GCL.Power-Capacity-Avail.Total.1Hour.1Hour.CBT-RAW,MW,43824,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+GCL,Grand Coulee,outflow_kcfs,GCL.Flow-Out.Ave.1Hour.1Hour.CBT-REV,kcfs,43824,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+GCL,Grand Coulee,genflow_kcfs,GCL.Flow-Gen.Ave.1Hour.1Hour.CBT-REV,kcfs,43823,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+GCL,Grand Coulee,spill_kcfs,GCL.Flow-Spill.Ave.1Hour.1Hour.CBT-REV,kcfs,43821,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+GCL,Grand Coulee,forebay_elev_ft,GCL.Elev-Forebay.Inst.1Hour.0.CBT-REV,ft,43824,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+GCL,Grand Coulee,tailwater_elev_ft,GCL.Elev-Tailwater.Inst.1Hour.0.CBT-REV,ft,43824,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+GCL,Grand Coulee,storage_kaf,GCL.Stor.Inst.1Hour.0.CBT-REV,kaf,43683,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+HGH,Hungry Horse,power_MW,HGH.Power.Total.1Hour.1Hour.CBT-REV,MW,43710,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+HGH,Hungry Horse,station_service_MW,HGH.Power-StationService.Total.1Hour.1Hour.CBT-REV,MW,43710,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+HGH,Hungry Horse,spinning_reserve_MW,HGH.Power-SpinningReserve.Inst.1Hour.0.CBT-REV,MW,43710,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+HGH,Hungry Horse,outflow_kcfs,HGH.Flow-Out.Ave.1Hour.1Hour.CBT-REV,kcfs,43710,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+HGH,Hungry Horse,genflow_kcfs,HGH.Flow-Gen.Ave.1Hour.1Hour.CBT-REV,kcfs,43710,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+HGH,Hungry Horse,spill_kcfs,HGH.Flow-Spill.Ave.1Hour.1Hour.CBT-REV,kcfs,43710,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+HGH,Hungry Horse,forebay_elev_ft,HGH.Elev-Forebay.Inst.1Hour.0.CBT-REV,ft,43710,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+HGH,Hungry Horse,tailwater_elev_ft,HGH.Elev-Tailwater.Inst.1Hour.0.CBT-REV,ft,43710,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+HGH,Hungry Horse,storage_kaf,HGH.Stor.Inst.1Hour.0.CBT-REV,kaf,43175,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+IHR,Ice Harbor,power_MW,IHR.Power.Total.1Hour.1Hour.CBT-RAW,MW,43736,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+IHR,Ice Harbor,station_service_MW,IHR.Power-StationService.Total.1Hour.1Hour.CBT-RAW,MW,43737,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+IHR,Ice Harbor,outflow_kcfs,IHR.Flow-Out.Ave.1Hour.1Hour.CBT-REV,kcfs,43782,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+IHR,Ice Harbor,genflow_kcfs,IHR.Flow-Gen.Ave.1Hour.1Hour.CBT-REV,kcfs,43783,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+IHR,Ice Harbor,spill_kcfs,IHR.Flow-Spill.Ave.1Hour.1Hour.CBT-REV,kcfs,43784,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+IHR,Ice Harbor,forebay_elev_ft,IHR.Elev-Forebay.Inst.1Hour.0.CBT-REV,ft,43808,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+IHR,Ice Harbor,tailwater_elev_ft,IHR.Elev-Tailwater.Inst.1Hour.0.CBT-REV,ft,43781,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+IHR,Ice Harbor,storage_kaf,IHR.Stor.Inst.1Hour.0.CBT-COMPUTED-REV,kaf,43746,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+JDA,John Day,power_MW,JDA.Power.Total.1Hour.1Hour.CBT-RAW,MW,43810,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+JDA,John Day,station_service_MW,JDA.Power-StationService.Total.1Hour.1Hour.CBT-RAW,MW,43811,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+JDA,John Day,spinning_reserve_MW,JDA.Power-SpinningReserve.Inst.1Hour.0.CBT-REV,MW,23,43824,2019-12-23 22:00:00,2022-11-11 01:00:00
+JDA,John Day,outflow_kcfs,JDA.Flow-Out.Ave.1Hour.1Hour.CBT-REV,kcfs,43809,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+JDA,John Day,genflow_kcfs,JDA.Flow-Gen.Ave.1Hour.1Hour.CBT-REV,kcfs,43811,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+JDA,John Day,spill_kcfs,JDA.Flow-Spill.Ave.1Hour.1Hour.CBT-REV,kcfs,43808,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+JDA,John Day,forebay_elev_ft,JDA.Elev-Forebay.Inst.1Hour.0.CBT-REV,ft,43811,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+JDA,John Day,tailwater_elev_ft,JDA.Elev-Tailwater.Inst.1Hour.0.CBT-REV,ft,43811,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LIB,Libby,power_MW,LIB.Power.Total.1Hour.1Hour.CBT-RAW,MW,43551,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LIB,Libby,spinning_reserve_MW,LIB.Power-SpinningReserve.Inst.1Hour.0.CBT-RAW,MW,43551,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LIB,Libby,outflow_kcfs,LIB.Flow-Out.Ave.1Hour.1Hour.CBT-REV,kcfs,43706,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LIB,Libby,genflow_kcfs,LIB.Flow-Gen.Ave.1Hour.1Hour.CBT-REV,kcfs,43590,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LIB,Libby,spill_kcfs,LIB.Flow-Spill.Ave.1Hour.1Hour.CBT-REV,kcfs,43706,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LIB,Libby,forebay_elev_ft,LIB.Elev-Forebay.Inst.1Hour.0.CBT-REV,ft,43822,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LIB,Libby,tailwater_elev_ft,LIB.Elev-Tailwater.Inst.1Hour.0.CBT-REV,ft,43590,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LIB,Libby,storage_kaf,LIB.Stor.Inst.1Hour.0.CBT-REV,kaf,42941,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LGS,Little Goose,power_MW,LGS.Power.Total.1Hour.1Hour.CBT-RAW,MW,43728,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LGS,Little Goose,station_service_MW,LGS.Power-StationService.Total.1Hour.1Hour.CBT-RAW,MW,43728,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LGS,Little Goose,outflow_kcfs,LGS.Flow-Out.Ave.1Hour.1Hour.CBT-REV,kcfs,43772,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LGS,Little Goose,genflow_kcfs,LGS.Flow-Gen.Ave.1Hour.1Hour.CBT-REV,kcfs,43772,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LGS,Little Goose,spill_kcfs,LGS.Flow-Spill.Ave.1Hour.1Hour.CBT-REV,kcfs,43769,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LGS,Little Goose,forebay_elev_ft,LGS.Elev-Forebay.Inst.1Hour.0.CBT-REV,ft,43772,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LGS,Little Goose,tailwater_elev_ft,LGS.Elev-Tailwater.Inst.1Hour.0.CBT-REV,ft,43773,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LGS,Little Goose,storage_kaf,LGS.Stor.Inst.1Hour.0.CBT-COMPUTED-REV,kaf,43805,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LWG,Lower Granite,power_MW,LWG.Power.Total.1Hour.1Hour.CBT-RAW,MW,43695,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LWG,Lower Granite,station_service_MW,LWG.Power-StationService.Total.1Hour.1Hour.CBT-RAW,MW,43695,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LWG,Lower Granite,spinning_reserve_MW,LWG.Power-SpinningReserve.Inst.1Hour.0.CBT-RAW,MW,2,43824,2019-01-13 01:00:00,2020-02-27 06:00:00
+LWG,Lower Granite,outflow_kcfs,LWG.Flow-Out.Ave.1Hour.1Hour.CBT-REV,kcfs,43735,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LWG,Lower Granite,genflow_kcfs,LWG.Flow-Gen.Ave.1Hour.1Hour.CBT-REV,kcfs,43735,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LWG,Lower Granite,spill_kcfs,LWG.Flow-Spill.Ave.1Hour.1Hour.CBT-REV,kcfs,43733,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LWG,Lower Granite,forebay_elev_ft,LWG.Elev-Forebay.Inst.1Hour.0.CBT-REV,ft,43735,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LWG,Lower Granite,tailwater_elev_ft,LWG.Elev-Tailwater.Inst.1Hour.0.CBT-REV,ft,43735,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LWG,Lower Granite,storage_kaf,LWG.Stor.Inst.1Hour.0.CBT-COMPUTED-REV,kaf,43770,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LMN,Lower Monumental,power_MW,LMN.Power.Total.1Hour.1Hour.CBT-RAW,MW,43707,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LMN,Lower Monumental,station_service_MW,LMN.Power-StationService.Total.1Hour.1Hour.CBT-RAW,MW,43706,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LMN,Lower Monumental,outflow_kcfs,LMN.Flow-Out.Ave.1Hour.1Hour.CBT-REV,kcfs,43749,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LMN,Lower Monumental,genflow_kcfs,LMN.Flow-Gen.Ave.1Hour.1Hour.CBT-REV,kcfs,43749,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LMN,Lower Monumental,spill_kcfs,LMN.Flow-Spill.Ave.1Hour.1Hour.CBT-REV,kcfs,43747,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LMN,Lower Monumental,forebay_elev_ft,LMN.Elev-Forebay.Inst.1Hour.0.CBT-REV,ft,43749,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LMN,Lower Monumental,tailwater_elev_ft,LMN.Elev-Tailwater.Inst.1Hour.0.CBT-REV,ft,43749,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+LMN,Lower Monumental,storage_kaf,LMN.Stor.Inst.1Hour.0.CBT-COMPUTED-REV,kaf,43775,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+MCN,McNary,power_MW,MCN.Power.Total.1Hour.1Hour.CBT-RAW,MW,43772,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+MCN,McNary,station_service_MW,MCN.Power-StationService.Total.1Hour.1Hour.CBT-RAW,MW,43772,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+MCN,McNary,outflow_kcfs,MCN.Flow-Out.Ave.1Hour.1Hour.CBT-REV,kcfs,43772,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+MCN,McNary,genflow_kcfs,MCN.Flow-Gen.Ave.1Hour.1Hour.CBT-REV,kcfs,43772,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+MCN,McNary,spill_kcfs,MCN.Flow-Spill.Ave.1Hour.1Hour.CBT-REV,kcfs,43772,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+MCN,McNary,forebay_elev_ft,MCN.Elev-Forebay.Inst.1Hour.0.CBT-REV,ft,43773,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+MCN,McNary,tailwater_elev_ft,MCN.Elev-Tailwater.Inst.1Hour.0.CBT-REV,ft,43772,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+TDA,The Dalles,power_MW,TDA.Power.Total.1Hour.1Hour.CBT-RAW,MW,43787,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+TDA,The Dalles,station_service_MW,TDA.Power-StationService.Total.1Hour.1Hour.CBT-RAW,MW,43787,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+TDA,The Dalles,spinning_reserve_MW,TDA.Power-SpinningReserve.Inst.1Hour.0.CBT-RAW,MW,19,43824,2018-01-08 14:00:00,2018-01-19 11:00:00
+TDA,The Dalles,outflow_kcfs,TDA.Flow-Out.Ave.1Hour.1Hour.CBT-REV,kcfs,43786,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+TDA,The Dalles,genflow_kcfs,TDA.Flow-Gen.Ave.1Hour.1Hour.CBT-REV,kcfs,43786,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+TDA,The Dalles,spill_kcfs,TDA.Flow-Spill.Ave.1Hour.1Hour.CBT-REV,kcfs,43785,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+TDA,The Dalles,forebay_elev_ft,TDA.Elev-Forebay.Inst.1Hour.0.CBT-REV,ft,43788,43824,2018-01-01 00:00:00,2022-12-31 23:00:00
+TDA,The Dalles,tailwater_elev_ft,TDA.Elev-Tailwater.Inst.1Hour.0.CBT-REV,ft,43787,43824,2018-01-01 00:00:00,2022-12-31 23:00:00

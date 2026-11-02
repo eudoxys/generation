@@ -1,0 +1,8 @@
+file,dam,datetime_utc,power_MW_original,power_MW_adjust,prev_hour_power_MW,next_hour_power_MW,recording_error,other_equally_close_reconstruction
+BPA_dams/USACE_CWMS_hourly/CHJ_ChiefJoseph_hourly_2018_2022_UTC.csv,CHJ,2018-01-30 07:00:00,12131,1213,1447,1093,delete digit '1' at position 5,1211 (delete digit '3' at position 4); 1213.1 (decimal point misplaced (/10))
+BPA_dams/USACE_CWMS_hourly/CHJ_ChiefJoseph_hourly_2018_2022_UTC.csv,CHJ,2018-02-17 16:00:00,10992,1992,2006,2003,delete digit '0' at position 2,
+BPA_dams/USACE_CWMS_hourly/CHJ_ChiefJoseph_hourly_2018_2022_UTC.csv,CHJ,2018-03-18 15:00:00,10936,1093,847,1195,delete digit '6' at position 5,1093.6 (decimal point misplaced (/10)); 1096 (delete digit '3' at position 4)
+BPA_dams/USACE_CWMS_hourly/GCL_GrandCoulee_hourly_2018_2022_UTC.csv,GCL,2018-06-25 12:00:00,27620,2762,2435,3345,delete digit '0' at position 5,2760 (delete digit '2' at position 4); 2720 (delete digit '6' at position 3)
+BPA_dams/USACE_CWMS_hourly/GCL_GrandCoulee_hourly_2018_2022_UTC.csv,GCL,2018-09-25 01:00:00,22284,2284,2093,2284,delete digit '2' at position 1,2284 (delete digit '2' at position 2); 2284 (delete digit '2' at position 3)
+BPA_dams/USACE_CWMS_hourly/GCL_GrandCoulee_hourly_2018_2022_UTC.csv,GCL,2018-10-28 20:00:00,18.1,1810,1683,1471,decimal point misplaced (x100),
+BPA_dams/USACE_CWMS_hourly/GCL_GrandCoulee_hourly_2018_2022_UTC.csv,GCL,2022-11-28 11:00:00,16.9,1690,1549,2076,decimal point misplaced (x100),

@@ -1,0 +1,15 @@
+code,dam,owner,river,state,big_10,data_file,eia_plant_id,nameplate_MW_EIA860_2020
+ALF,Albeni Falls,USACE,Pend Oreille River,ID,no,USACE_CWMS_hourly/ALF_AlbeniFalls_hourly_2018_2022_UTC.csv,851,42.0
+BON,Bonneville,USACE,Columbia River,WA/OR,yes,USACE_CWMS_hourly/BON_Bonneville_hourly_2018_2022_UTC.csv,3075,1162.0
+CHJ,Chief Joseph,USACE,Columbia River,WA,yes,USACE_CWMS_hourly/CHJ_ChiefJoseph_hourly_2018_2022_UTC.csv,3921,2456.2
+DWR,Dworshak,USACE,North Fork Clearwater River,ID,no,USACE_CWMS_hourly/DWR_Dworshak_hourly_2018_2022_UTC.csv,840,465.0
+GCL,Grand Coulee,USBR,Columbia River,WA,yes,USACE_CWMS_hourly/GCL_GrandCoulee_hourly_2018_2022_UTC.csv,6163,6809.0
+HGH,Hungry Horse,USBR,South Fork Flathead River,MT,no,USACE_CWMS_hourly/HGH_HungryHorse_hourly_2018_2022_UTC.csv,2203,428.0
+IHR,Ice Harbor,USACE,Snake River,WA,yes,USACE_CWMS_hourly/IHR_IceHarbor_hourly_2018_2022_UTC.csv,3925,603.0
+JDA,John Day,USACE,Columbia River,WA/OR,yes,USACE_CWMS_hourly/JDA_JohnDay_hourly_2018_2022_UTC.csv,3082,2160.0
+LIB,Libby,USACE,Kootenai River,MT,no,USACE_CWMS_hourly/LIB_Libby_hourly_2018_2022_UTC.csv,6172,525.0
+LGS,Little Goose,USACE,Snake River,WA,yes,USACE_CWMS_hourly/LGS_LittleGoose_hourly_2018_2022_UTC.csv,3926,810.0
+LWG,Lower Granite,USACE,Snake River,WA,yes,USACE_CWMS_hourly/LWG_LowerGranite_hourly_2018_2022_UTC.csv,6175,810.0
+LMN,Lower Monumental,USACE,Snake River,WA,yes,USACE_CWMS_hourly/LMN_LowerMonumental_hourly_2018_2022_UTC.csv,3927,810.0
+MCN,McNary,USACE,Columbia River,WA/OR,yes,USACE_CWMS_hourly/MCN_McNary_hourly_2018_2022_UTC.csv,3084,990.5
+TDA,The Dalles,USACE,Columbia River,WA/OR,yes,USACE_CWMS_hourly/TDA_TheDalles_hourly_2018_2022_UTC.csv,3895,1819.7

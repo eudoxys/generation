@@ -1,0 +1,27 @@
+applies_to,column,description,unit
+USBR RISE monthly (*/USBR_RISE_monthly/*.csv),month,"Calendar month of the value (YYYY-MM, plant local time)",
+USBR RISE monthly (*/USBR_RISE_monthly/*.csv),period_start_utc,"Start of that month in UTC (local midnight on the 1st, as published by USBR)",UTC
+USBR RISE monthly (*/USBR_RISE_monthly/*.csv),plant,USBR power plant,
+USBR RISE monthly (*/USBR_RISE_monthly/*.csv),net_generation_kWh,Net generation in the month (gross generation minus station service),kWh
+USBR RISE monthly (*/USBR_RISE_monthly/*.csv),gross_generation_kWh,Gross generation in the month,kWh
+USBR RISE monthly (*/USBR_RISE_monthly/*.csv),station_service_kWh,Station service (plant auxiliary use) in the month,kWh
+USBR RISE monthly (*/USBR_RISE_monthly/*.csv),installed_capacity_kW,Installed generating capacity,kW
+USBR RISE monthly (*/USBR_RISE_monthly/*.csv),pumping_energy_kWh,"Energy used for pumping in the month (pump-generating units only, e.g. Flatiron Unit 3)",kWh
+WAPA SCADA hourly (3_CRSP/WAPA_SCADA_hourly/*.csv),datetime_utc,"Timestamp, UTC, hour-ending",UTC
+WAPA SCADA hourly (3_CRSP/WAPA_SCADA_hourly/*.csv),scada_local_date,"Date as printed in the WAPA SCADA file (Mountain Standard Time, no daylight saving)",
+WAPA SCADA hourly (3_CRSP/WAPA_SCADA_hourly/*.csv),scada_hour_ending,"Hour as printed in the WAPA SCADA file (1-24, hour-ending, Mountain Standard Time)",
+WAPA SCADA hourly (3_CRSP/WAPA_SCADA_hourly/*.csv),generation_MW,Plant generation in the hour; empty where the WAPA file has no value,MW
+EIA-923 monthly (4_Pick_Sloan/EIA923_monthly_USACE_mainstem/*.csv),month,Calendar month (YYYY-MM),
+EIA-923 monthly (4_Pick_Sloan/EIA923_monthly_USACE_mainstem/*.csv),plant,Dam / power plant,
+EIA-923 monthly (4_Pick_Sloan/EIA923_monthly_USACE_mainstem/*.csv),state,State,
+EIA-923 monthly (4_Pick_Sloan/EIA923_monthly_USACE_mainstem/*.csv),eia_plant_id,EIA plant identifier,
+EIA-923 monthly (4_Pick_Sloan/EIA923_monthly_USACE_mainstem/*.csv),operator,Plant operator as reported to EIA,
+EIA-923 monthly (4_Pick_Sloan/EIA923_monthly_USACE_mainstem/*.csv),net_generation_MWh,"Net generation in the month, sum over all prime movers of the plant",MWh
+sources.csv,project_folder / dataset / plant,Which data file and plant the source row belongs to,
+sources.csv,item,"Column of the data file (RISE), period (SCADA PDF) or year (EIA-923)",
+sources.csv,source_id / source_title,"RISE series id and title, SCADA PDF file name, or EIA plant id and file/sheet",
+sources.csv,page_url / download_url,Web page of the source and direct download link (RISE: CSV of 2018-2022),
+sources.csv,records / notes,"Number of records in the source and any data note (duplicates, blank hours)",
+plant_list.csv,project_folder / wapa_project / plant,WAPA project and plant,
+plant_list.csv,owner / state / pick_sloan_division,"Plant owner (USBR or USACE), state, Pick-Sloan division",
+plant_list.csv,data_source / source_location_id / data_file,Source of the monthly data (RISE location id or EIA plant id) and the data file,

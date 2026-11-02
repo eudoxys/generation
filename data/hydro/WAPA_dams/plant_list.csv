@@ -1,0 +1,46 @@
+project_folder,wapa_project,plant,owner,state,pick_sloan_division,data_source,source_location_id,data_file
+1_Boulder_Canyon,Boulder Canyon,Hoover,USBR,AZ/NV,,USBR RISE,3277,1_Boulder_Canyon/USBR_RISE_monthly/Boulder_Canyon_plant_generation_monthly_2018_2022.csv
+2_Parker_Davis,Parker-Davis,Davis,USBR,AZ/NV,,USBR RISE,3259,2_Parker_Davis/USBR_RISE_monthly/Parker_Davis_plant_generation_monthly_2018_2022.csv
+2_Parker_Davis,Parker-Davis,Parker,USBR,AZ/CA,,USBR RISE,3293,2_Parker_Davis/USBR_RISE_monthly/Parker_Davis_plant_generation_monthly_2018_2022.csv
+3_CRSP,CRSP,Blue Mesa,USBR,CO,,USBR RISE,3252,3_CRSP/USBR_RISE_monthly/CRSP_plant_generation_monthly_2018_2022.csv
+3_CRSP,CRSP,Crystal,USBR,CO,,USBR RISE,3258,3_CRSP/USBR_RISE_monthly/CRSP_plant_generation_monthly_2018_2022.csv
+3_CRSP,CRSP,Flaming Gorge,USBR,UT,,USBR RISE,3263,3_CRSP/USBR_RISE_monthly/CRSP_plant_generation_monthly_2018_2022.csv
+3_CRSP,CRSP,Fontenelle,USBR,WY,,USBR RISE,3267,3_CRSP/USBR_RISE_monthly/CRSP_plant_generation_monthly_2018_2022.csv
+3_CRSP,CRSP,Glen Canyon,USBR,AZ,,USBR RISE,3269,3_CRSP/USBR_RISE_monthly/CRSP_plant_generation_monthly_2018_2022.csv
+3_CRSP,CRSP,Morrow Point,USBR,CO,,USBR RISE,3287,3_CRSP/USBR_RISE_monthly/CRSP_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Big Bend,USACE,SD,Eastern Division,EIA-923,3375,4_Pick_Sloan/EIA923_monthly_USACE_mainstem/Pick_Sloan_USACE_mainstem_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Fort Peck,USACE,MT,Eastern Division,EIA-923,6623,4_Pick_Sloan/EIA923_monthly_USACE_mainstem/Pick_Sloan_USACE_mainstem_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Fort Randall,USACE,SD,Eastern Division,EIA-923,3373,4_Pick_Sloan/EIA923_monthly_USACE_mainstem/Pick_Sloan_USACE_mainstem_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Garrison,USACE,ND,Eastern Division,EIA-923,2815,4_Pick_Sloan/EIA923_monthly_USACE_mainstem/Pick_Sloan_USACE_mainstem_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Gavins Point,USACE,NE,Eastern Division,EIA-923,6624,4_Pick_Sloan/EIA923_monthly_USACE_mainstem/Pick_Sloan_USACE_mainstem_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Oahe,USACE,SD,Eastern Division,EIA-923,3356,4_Pick_Sloan/EIA923_monthly_USACE_mainstem/Pick_Sloan_USACE_mainstem_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Alcova,USBR,WY,Western Division,USBR RISE,3248,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Big Thompson,USBR,CO,Western Division (Colorado-Big Thompson),USBR RISE,3250,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Boysen,USBR,WY,Western Division,USBR RISE,3254,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Buffalo Bill,USBR,WY,Western Division,USBR RISE,3255,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Canyon Ferry,USBR,MT,Eastern Division,USBR RISE,3256,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Estes,USBR,CO,Western Division (Colorado-Big Thompson),USBR RISE,3262,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Flatiron Unit 3 (pump-generating),USBR,CO,Western Division (Colorado-Big Thompson),USBR RISE,3265,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Flatiron Units 1-2,USBR,CO,Western Division (Colorado-Big Thompson),USBR RISE,3264,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Fremont Canyon,USBR,WY,Western Division,USBR RISE,3268,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Glendo,USBR,WY,Western Division,USBR RISE,3270,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Green Mountain,USBR,CO,Western Division (Colorado-Big Thompson),USBR RISE,3273,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Guernsey,USBR,WY,Western Division,USBR RISE,3275,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Heart Mountain,USBR,WY,Western Division,USBR RISE,3276,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Kortes,USBR,WY,Western Division,USBR RISE,3281,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Marys Lake,USBR,CO,Western Division (Colorado-Big Thompson),USBR RISE,3284,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Pole Hill,USBR,CO,Western Division (Colorado-Big Thompson),USBR RISE,3294,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Seminoe,USBR,WY,Western Division,USBR RISE,3297,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Shoshone,USBR,WY,Western Division,USBR RISE,3299,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Spirit Mountain,USBR,WY,Western Division,USBR RISE,3300,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+4_Pick_Sloan,Pick-Sloan,Yellowtail,USBR,MT,Eastern Division,USBR RISE,3306,4_Pick_Sloan/USBR_RISE_monthly/Pick_Sloan_plant_generation_monthly_2018_2022.csv
+5_Central_Valley,Central Valley,Folsom,USBR,CA,,USBR RISE,3266,5_Central_Valley/USBR_RISE_monthly/Central_Valley_plant_generation_monthly_2018_2022.csv
+5_Central_Valley,Central Valley,Judge Francis Carr,USBR,CA,,USBR RISE,3279,5_Central_Valley/USBR_RISE_monthly/Central_Valley_plant_generation_monthly_2018_2022.csv
+5_Central_Valley,Central Valley,Keswick,USBR,CA,,USBR RISE,3280,5_Central_Valley/USBR_RISE_monthly/Central_Valley_plant_generation_monthly_2018_2022.csv
+5_Central_Valley,Central Valley,Lewiston,USBR,CA,,USBR RISE,3282,5_Central_Valley/USBR_RISE_monthly/Central_Valley_plant_generation_monthly_2018_2022.csv
+5_Central_Valley,Central Valley,New Melones,USBR,CA,,USBR RISE,3289,5_Central_Valley/USBR_RISE_monthly/Central_Valley_plant_generation_monthly_2018_2022.csv
+5_Central_Valley,Central Valley,Nimbus,USBR,CA,,USBR RISE,3290,5_Central_Valley/USBR_RISE_monthly/Central_Valley_plant_generation_monthly_2018_2022.csv
+5_Central_Valley,Central Valley,Shasta,USBR,CA,,USBR RISE,3298,5_Central_Valley/USBR_RISE_monthly/Central_Valley_plant_generation_monthly_2018_2022.csv
+5_Central_Valley,Central Valley,Spring Creek,USBR,CA,,USBR RISE,3301,5_Central_Valley/USBR_RISE_monthly/Central_Valley_plant_generation_monthly_2018_2022.csv
+5_Central_Valley,Central Valley,Stampede,USBR,CA,,USBR RISE,3302,5_Central_Valley/USBR_RISE_monthly/Central_Valley_plant_generation_monthly_2018_2022.csv
+5_Central_Valley,Central Valley,Trinity,USBR,CA,,USBR RISE,3304,5_Central_Valley/USBR_RISE_monthly/Central_Valley_plant_generation_monthly_2018_2022.csv
