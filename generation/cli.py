@@ -4,7 +4,7 @@
     generation YEAR [MONTH[,MONTH[,...]]] [STATE[,STATE[,...]]]
         [-C|--county COUNTY[,COUNTY[,...]]] [-D|--dataset DATASET]
         [-o|--output FILE] [-f|--format {csv,gzip}] [-r|--refresh]
-        [-h|--help] [-w|--warning] [-d|--debug]
+        [-h|--help] [-w|--warning] [-d|--debug] [--version]
 
 The `DATASET` is one of the following:
 
@@ -81,6 +81,8 @@ from generation.pumped_storage import PumpedStorage
 from generation.other import Other
 from generation.solar import Solar
 from generation.wind import Wind
+
+_logger = logging.getLogger(__file__)
 
 DATASETS = {
     "fleet": Fleet,
@@ -199,6 +201,12 @@ def main(
         parser.add_argument("-d","--debug",
             action="store_true",
             help="enable debug traceback on exceptions")
+
+        from generation import __version__ # pylint: disable=import-outside-toplevel
+        parser.add_argument("--version",
+            action="version",
+            version=f"%(prog)s {__version__}",
+            help="show the package version and exit")
 
         # parse arguments
         args = parser.parse_args(argv)

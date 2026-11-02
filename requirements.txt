@@ -1,8 +1,10 @@
+# third-party packages (unpinned unless a pin is needed)
 numpy
 pandas
-matplotlib
-marimo
+matplotlib # used by generation/_review notebooks
+marimo # used by generation/_review notebooks
 
+# sibling Eudoxys packages
 eia @ git+https://github.com/eudoxys/eia
 cache @ git+https://github.com/eudoxys/cache
 geohash @ git+https://github.com/eudoxys/geohash

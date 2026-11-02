@@ -1,11 +1,23 @@
-"""Test fixtures: replace EIA downloads with small local tables"""
+"""Test fixtures: replace EIA downloads with small local tables
 
+Set `GENERATION_CACHEDIR` to keep downloaded data in a folder other than the
+`cache` package default (inside site-packages, so lost on every fresh
+install, e.g., in CI). The autouse `offline` fixture still points each fast
+test at its own temporary cache.
+"""
+
+import os
 import sys
 import types
 
 import numpy as np
 import pandas as pd
 import pytest
+
+from cache import Cache
+
+if os.environ.get("GENERATION_CACHEDIR"):
+    Cache.CACHEDIR = os.environ["GENERATION_CACHEDIR"]
 
 ROWS = {
     "STATE": ["CA", "CA", "CA", "WA"],
