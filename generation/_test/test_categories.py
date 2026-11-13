@@ -5,6 +5,7 @@ import pytest
 
 from generation import (Coal, NaturalGas, Hydro, Solar, Wind,
     Dispatchable, Nondispatchable, Total)
+import generation.category as gc
 from generation.category import Category, clear
 from generation.cli import main, E_OK
 from generation.fuels import CATEGORIES, DISPATCHABLE, NONDISPATCHABLE, category
@@ -60,6 +61,23 @@ def test_shaped_by_form930():
     data = Solar("CA", "Stanislaus", 2020)
     assert data.loc[data.index.hour == 8, "solar_MW"].max() == 0
     assert data.loc[data.index.hour == 20, "solar_MW"].min() > 0
+
+
+def test_shape_follows_form930():
+    shape = gc._shape("BANC", 2020, 1, "SUN")
+    assert abs(shape.sum() - 1) < 1e-9
+    assert shape.idxmax().hour == 20
+    assert not shape.eq(shape.iloc[0]).all()
+
+
+def test_form930_api_errors_not_hidden(monkeypatch):
+
+    def broken(*args, **kwargs):
+        raise TypeError("unexpected argument")
+
+    monkeypatch.setattr(gc, "Form930Fuel", broken)
+    with pytest.raises(TypeError):
+        gc._shape("BANC", 2020, 1, "SUN")
 
 
 def test_flat_when_no_form930():
