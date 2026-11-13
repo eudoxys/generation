@@ -70,6 +70,11 @@ that is expected to satisfy:
 `generation.fleet.Fleet` returns the Form 860m operating generator
 inventory (one row per unit and month) used to find the plants in a county.
 
+`generation.data.Data` reads a CSV file from the `data/` folder of the
+source repository. The data files are not installed with the package; each
+is downloaded from GitHub the first time it is used and then read from the
+cache.
+
 What is not promised
 --------------------
 
@@ -113,6 +118,8 @@ Modules
 - `generation.cli`: Command line interface
 
 - `generation.fleet`: Generator fleet inventory (EIA Form 860m)
+
+- `generation.data`: Repository data files (downloaded and cached on demand)
 
 - `generation.fuels`: Energy source codes and generation categories
 
@@ -176,6 +183,7 @@ except Exception: # pylint: disable=broad-exception-caught
 
 # re-export the public API
 from generation.fleet import Fleet
+from generation.data import Data
 from generation.coal import Coal
 from generation.natural_gas import NaturalGas
 from generation.oil import Oil

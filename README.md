@@ -124,6 +124,20 @@ Each row of `Fleet` is one operating generating unit in the given month.
 | `latitude`, `longitude` | Plant location |
 | `geohash` | Plant location geohash (6 characters) |
 
+## Repository data
+
+The curated data in the repository's `data/` folder (e.g., the BPA and WAPA
+hydro data in `data/hydro/`) is not installed with the package. `Data`
+downloads a file from the repository the first time it is used, caches it,
+and returns it as a data frame:
+
+```python
+from generation import Data
+dams = Data("hydro/BPA_dams/dam_list.csv")
+```
+
+Keyword arguments other than `refresh` are passed to `pandas.read_csv()`.
+
 # License
 
 MIT. See [LICENSE](LICENSE) and [COPYRIGHT.md](COPYRIGHT.md).

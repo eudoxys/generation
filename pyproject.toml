@@ -2,6 +2,11 @@
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+# only the package itself; the repository data/ folder is not installed
+# (generation.data.Data downloads data files on demand)
+include = ["generation*"]
+
 [tool.setuptools.package-data]
 # list every file pattern the package reads at run time
 generation = ["*.py"]
