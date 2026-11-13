@@ -68,7 +68,10 @@ make docs
 ```
 
 The test suite is offline (fakes for Forms 860m, 923 and 930 in
-`generation/_test/conftest.py`) and takes seconds. Real runs download EIA
+`generation/_test/conftest.py`) and takes seconds. `test_eia.py` runs the
+real `eia` classes on synthetic EIA files with a mocked `requests.get` and
+checks the fakes match them; after an `eia` change, fix the call sites and
+the fakes until it passes. Real runs download EIA
 data and need an EIA API key for Form 930. CI (`validate.yaml`) runs pylint
 (informational) and pytest on Python 3.12.
 
