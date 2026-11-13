@@ -18,7 +18,8 @@ Update this file in the same PR that adds, moves, or deletes a file.
 - Add a data source (CEMS, NRC, backfill): see `DESIGN.md` "Module layout" (planned modules) and `generation/category.py` (shaping); test with a fake in `generation/_test/conftest.py`
 - Change an output column: module docstring example, `generation/__init__.py` Data section, `README.md`, `DESIGN.md` columns table
 - Add a CLI option: `generation/cli.py`, `generation/__init__.py` Syntax section, `README.md`
-- Fix a test: fakes for Forms 860m/923/930 are in `generation/_test/conftest.py`
+- Fix a test: fakes for Forms 860m/923/930 are in `generation/_test/conftest.py`; `generation/_test/test_eia.py` checks them against the real `eia` classes (sample EIA files in `generation/_test/eia_samples.py`)
+- Update for an `eia` API or schema change: fix the call sites in `generation/fleet.py` and `generation/category.py`, then the fakes in `generation/_test/conftest.py` until `generation/_test/test_eia.py` passes
 - Update docs: docstrings, then `make docs`
 - Add repository data: put it under `data/` with a README; read it with `generation.data.Data` (not installed with the package)
 - Release: `pyproject.toml` version; see the eudoxys-package skill checklist
@@ -59,6 +60,8 @@ Update this file in the same PR that adds, moves, or deletes a file.
 | `generation/_test/test_fleet.py` | `Fleet` and `fleet` CLI tests | fast, offline |
 | `generation/_test/test_categories.py` | category, combination and hourly CLI tests | fast, offline |
 | `generation/_test/test_data.py` | `Data` tests | fast, offline (serves files from the checkout's `data/`) |
+| `generation/_test/test_eia.py` | real `eia` classes vs. the fakes; `Fleet` and hourly frames built from each | offline (mocked `requests.get`); skipped without `eia` |
+| `generation/_test/eia_samples.py` | synthetic Form 860m/923/930 source files for `test_eia.py` | |
 | `generation/_review/README.md` | how to run the review notebooks | |
 | `generation/_review/review_generation_marimo.py` | marimo plots of `Total` for a county | downloads EIA data |
 
