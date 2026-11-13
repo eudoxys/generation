@@ -42,7 +42,11 @@ Sibling Eudoxys dependencies:
 - Index `timestamp`, tz-aware UTC, hour-beginning (decision #2). Power
   columns end in `_MW` (decision #13); an hourly mean MW equals MWh.
 - Net generation can be negative (storage, station use).
-- Missing Form 930 data falls back to a flat monthly shape, logged at DEBUG.
+- Missing Form 930 data falls back to a flat monthly shape. When
+  `Form930Fuel` has no data for a BA-year (no API key for 2019 on, unknown
+  BA, year before 2018) a `UserWarning` is issued; a BA that doesn't report a
+  category's code, or a non-positive monthly total, is flat silently. Other
+  errors (e.g., `TypeError` from an `eia` API change) propagate.
 - Category frames are cached as
   `generation/0/{ST}/{county}/{year}/{category}.csv.gz`; bump
   `Category.VERSION` when the cached format changes.
@@ -73,8 +77,10 @@ data and need an EIA API key for Form 930. CI (`validate.yaml`) runs pylint
 - `docs/` is committed and the repo still has GitHub's branch-based
   `pages-build-deployment`. `deploy-pages.yaml` needs the Pages source set to
   "GitHub Actions"; after that, `docs/` can be removed from git.
-- CEMS, NRC and the Jan–Jun 2018 backfill are planned (`DESIGN.md`) but not
-  implemented; those hours use a flat shape.
+- CEMS, NRC and the 2018 backfill are planned (`DESIGN.md`) but not
+  implemented; those hours use a flat shape. `eia.Form930Fuel` starts in
+  July 2018 (Jul–Dec 2018 from the EIA-930 six-month file, eudoxys/eia#51),
+  so Jan–Jun 2018 is flat silently.
 - AGC flags, county geohash keys, and the long `county_generation` table are
   not implemented yet.
 - `Fleet` has a different constructor (`Fleet(state,county,year,*,months)`,

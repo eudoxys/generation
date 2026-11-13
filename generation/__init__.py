@@ -78,11 +78,13 @@ cache.
 What is not promised
 --------------------
 
-  - CEMS hourly unit loads, NRC reactor status, and the January-June 2018
-    backfill are not implemented yet; those hours use a flat monthly shape.
+  - CEMS hourly unit loads, NRC reactor status, and the 2018 backfill are not
+    implemented yet; those hours use a flat monthly shape. `eia.Form930Fuel`
+    starts in July 2018, so January-June 2018 is flat.
 
-  - Form 930 hourly shapes need an EIA API key; without one all categories
-    use a flat monthly shape.
+  - Form 930 hourly shapes for 2019 and later need an EIA API key; without
+    one all categories use a flat monthly shape and a `UserWarning` is
+    issued. July-December 2018 needs no key.
 
   - EIA state-fuel increments (Form 923 plant `99999`) are not located in a
     county and are not included.

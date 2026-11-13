@@ -95,19 +95,21 @@ class FakeForm923(pd.DataFrame):
 class FakeForm930Fuel(pd.DataFrame):
     """Offline stand-in for `eia.Form930Fuel`
 
-    BANC reports a diurnal `SUN_MW` and a constant `WAT_MW`; other
-    respondents are not available.
+    Matches the `eia` signature `Form930Fuel(year,month=None,*,respondent)`:
+    indexed by UTC hour-beginning `timestamp`, with lower-case `{code}_mw`
+    columns. BANC reports a diurnal `sun_mw` and a constant `wat_mw`; other
+    respondents raise `ValueError` like an invalid respondent code does.
     """
 
     calls = []
 
-    def __init__(self, respondent, year, month=None, *, fuels=None, refresh=False):
+    def __init__(self, year, month=None, *, respondent, fuels=None, raw=False, refresh=False):
         FakeForm930Fuel.calls.append((respondent, year))
         if respondent != "BANC":
-            raise AssertionError(f"{respondent=} is not valid")
-        index = hours(year)
+            raise ValueError(f"respondent={respondent!r} is not a valid respondent code")
+        index = pd.DatetimeIndex(hours(year), name="timestamp")
         sun = np.maximum(0, np.cos(2 * np.pi * (index.hour - 20) / 24))  # peak at 20:00Z
-        super().__init__({"timestamp": index, "SUN_MW": 100 * sun, "WAT_MW": 50.0})
+        super().__init__({"sun_mw": 100 * sun, "wat_mw": 50.0}, index=index)
 
 
 # allow the suite to run where the eia package isn't installed

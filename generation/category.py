@@ -44,8 +44,12 @@ flowchart LR
    generation of the plant's balancing authority for the category's energy
    source (see `generation.fuels.SHAPES`), normalized to sum to 1 over the
    month. A flat shape is used when the category has no Form 930 code, the
-   balancing authority does not report it, the month is before July 2018, or
-   the monthly Form 930 total is not positive.
+   balancing authority does not report it, or the monthly Form 930 total is
+   not positive, and for January-June 2018 (`eia.Form930Fuel` starts in July
+   2018). When `eia.Form930Fuel` has no data for the balancing authority and
+   year (e.g., no EIA API key for 2019 or later, or an unknown balancing
+   authority), a `UserWarning` is issued and every category in that
+   balancing authority and year uses the flat shape.
 
 An hourly mean MW equals the MWh in that hour, so the plant columns sum to the
 Form 923 monthly net generation.
@@ -56,9 +60,9 @@ Caveats
   - EIA "state-fuel level increment" estimates (Form 923 plant `99999`) cannot
     be located in a county and are not included.
 
-  - CEMS hourly unit loads, NRC reactor status and the January-June 2018
-    backfill described in `DESIGN.md` are not implemented yet, so those hours
-    use the flat shape.
+  - CEMS hourly unit loads, NRC reactor status and the 2018 backfill
+    described in `DESIGN.md` are not implemented yet, so those hours use the
+    flat shape.
 
   - Net generation can be negative, e.g., storage, and plants whose station
     use exceeds their output.
@@ -152,13 +156,18 @@ def _monthly(state:str,year:int,refresh:bool=False) -> pd.DataFrame:
 
 @functools.cache
 def _profile(ba:str,year:int,refresh:bool=False) -> pd.DataFrame|None:
-    """@private Get the Form 930 hourly net generation by energy source of a BA"""
+    """@private Get the Form 930 hourly net generation by energy source of a BA
+
+    Returns a frame indexed by UTC hour-beginning `timestamp` with one
+    `{code}_mw` column per energy source code (lower case), or `None` when
+    the data is not available. Errors other than missing data (e.g.,
+    `TypeError` or `KeyError` from an `eia` API change) are not caught.
+    """
     try:
-        data = Form930Fuel(ba,year,refresh=refresh)
-    except Exception as err: # pylint: disable=broad-exception-caught
+        data = Form930Fuel(year,respondent=ba,refresh=refresh)
+    except (ValueError,RuntimeError,OSError) as err:
         warnings.warn(f"no Form 930 energy source data for {ba} in {year} ({err}); using flat shapes")
         return None
-    data = data.set_index("timestamp")
     data.index = pd.DatetimeIndex(data.index).tz_convert("UTC")
     return data
 
@@ -174,9 +183,10 @@ def _shape(ba:str|None,year:int,month:int,code:str|None,refresh:bool=False) -> p
     if code is None or not isinstance(ba,str) or not ba:
         return flat
     profile = _profile(ba,year,refresh)
-    if profile is None or f"{code}_MW" not in profile.columns:
+    column = f"{code.lower()}_mw"
+    if profile is None or column not in profile.columns:
         return flat
-    values = profile[f"{code}_MW"].reindex(index).astype(float)
+    values = profile[column].reindex(index).astype(float)
     if values.notna().sum() == 0:
         return flat
     values = values.interpolate(limit_direction="both")
