@@ -59,6 +59,7 @@ Update this file in the same PR that adds, moves, or deletes a file.
 | `generation/_test/conftest.py` | fake EIA forms, temporary cache, `GENERATION_CACHEDIR` | |
 | `generation/_test/test_fleet.py` | `Fleet` and `fleet` CLI tests | fast, offline |
 | `generation/_test/test_categories.py` | category, combination and hourly CLI tests | fast, offline |
+| `generation/_test/test_wecc.py` | `data/wecc/build_wecc.py` tests | fast, offline |
 | `generation/_test/test_data.py` | `Data` tests | fast, offline (serves files from the checkout's `data/`) |
 | `generation/_test/test_eia.py` | real `eia` classes vs. the fakes; `Fleet` and hourly frames built from each | offline (mocked `requests.get`); skipped without `eia` |
 | `generation/_test/eia_samples.py` | synthetic Form 860m/923/930 source files for `test_eia.py` | |
@@ -96,6 +97,8 @@ Not installed with the package; read with `generation.data.Data`.
 |---|---|---|
 | `data/hydro/README.md` | BPA and WAPA hydro data: sources, columns, time convention | read this, not the data files |
 | `data/hydro/**` | BPA (hourly) and WAPA (monthly, CRSP hourly) federal hydro generation, 2018–2022 | ~50 MB; don't read |
+| `data/wecc/README.md` | WECC county hourly capacity and net generation by category, 2018–2022 | read this, not the data files |
+| `data/wecc/build_wecc.py` | builds the `data/wecc` files from EIA Forms 860m/923/930 | tested by `_test/test_wecc.py`; downloads EIA data |
 
 ## Generated
 
