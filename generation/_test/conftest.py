@@ -20,22 +20,25 @@ if os.environ.get("GENERATION_CACHEDIR"):
     Cache.CACHEDIR = os.environ["GENERATION_CACHEDIR"]
 
 ROWS = {
-    "STATE": ["CA", "CA", "CA", "WA"],
-    "BA_CODE": ["CISO", "BANC", "BANC", "BPAT"],
-    "COUNTY": ["Placer", "Stanislaus", "Stanislaus", "King"],
-    "SECTOR": ["IPP Non-CHP", "Electric Utility", "IPP Non-CHP", "Electric Utility"],
-    "ID": [34, 151, 152, 900],
-    "GENERATOR_ID": ["1P", "1", "PV1", "A"],
-    "NAME": ["Plant A", "Plant B", "Plant D", "Plant C"],
-    "OWNER_NAME": ["Owner A", "Owner B", "Owner D", "Owner C"],
-    "ENERGY_SOURCE_CODE": ["NG", "WAT", "SUN", "WAT"],
-    "PRIME_MOVER_CODE": ["CT", "HY", "PV", "HY"],
-    "NAMEPLATE_MW": [12.1, 53.5, 20.0, 100.0],
-    "SUMMER_MW": [12.1, 53.5, 20.0, 100.0],
-    "WINTER_MW": [12.1, 53.5, 20.0, 100.0],
-    "LAT": [39.134259, 37.629360, 37.5, 47.6],
-    "LON": [-120.9533, -120.9314, -120.9, -122.3],
-    "UNIT_CODE": ["", "", "", ""],  # extra column that Fleet must drop
+    # same names as `eia.Form860m` (0.0.1); `plant` and `generator` are
+    # index levels there
+    "state": ["CA", "CA", "CA", "WA"],
+    "ba": ["CISO", "BANC", "BANC", "BPAT"],
+    "county": ["Placer", "Stanislaus", "Stanislaus", "King"],
+    "sector": ["IPP Non-CHP", "Electric Utility", "IPP Non-CHP", "Electric Utility"],
+    "plant": [34, 151, 152, 900],
+    "generator": ["1P", "1", "PV1", "A"],
+    "plant_name": ["Plant A", "Plant B", "Plant D", "Plant C"],
+    "owner": [1001, 1002, 1004, 1003],  # entity id, not used by Fleet
+    "owner_name": ["Owner A", "Owner B", "Owner D", "Owner C"],
+    "fuel": ["NG", "WAT", "SUN", "WAT"],
+    "pm": ["CT", "HY", "PV", "HY"],
+    "nameplate_mw": [12.1, 53.5, 20.0, 100.0],
+    "summer_mw": [12.1, 53.5, 20.0, 100.0],
+    "winter_mw": [12.1, 53.5, 20.0, 100.0],
+    "latitude": [39.134259, 37.629360, 37.5, 47.6],
+    "longitude": [-120.9533, -120.9314, -120.9, -122.3],
+    "unit": ["", "", "", ""],  # extra column that Fleet must drop
 }
 
 PLANTS = [
@@ -61,9 +64,11 @@ class FakeForm860m(pd.DataFrame):
 
     calls = []
 
-    def __init__(self, year, month, subset=None, refresh=None, raw=None):
+    def __init__(self, year, month, *, subset=None, raw=False, refresh=False):
         FakeForm860m.calls.append((year, month, subset))
-        super().__init__(ROWS)
+        data = pd.DataFrame(ROWS)
+        data.insert(0, "timestamp", pd.Timestamp(year=year, month=month, day=1, tz="UTC"))
+        super().__init__(data.set_index(["timestamp", "plant", "generator"]))
 
 
 class FakeForm923(pd.DataFrame):

@@ -72,7 +72,7 @@ class Fleet(pd.DataFrame):
 
     - `name`: plant name
 
-    - `owner`: plant owner
+    - `owner`: plant owner name
 
     - `fuel`: plant energy source
 
@@ -90,22 +90,24 @@ class Fleet(pd.DataFrame):
     """
 
     COLUMNS = {
-        "STATE": "state",
-        "BA_CODE": "region",
-        "COUNTY": "county",
-        "SECTOR": "sector",
-        "ID": "id",
-        "GENERATOR_ID": "unit",
-        "NAME": "name",
-        "OWNER_NAME": "owner",
-        "ENERGY_SOURCE_CODE": "fuel",
-        "PRIME_MOVER_CODE": "gen",
-        "NAMEPLATE_MW": "nameplate_MW",
-        "SUMMER_MW": "summer_MW",
-        "WINTER_MW": "winter_MW",
-        "LAT": "latitude",
-        "LON": "longitude",
+        "state": "state",
+        "ba": "region",
+        "county": "county",
+        "sector": "sector",
+        "plant": "id",
+        "generator": "unit",
+        "plant_name": "name",
+        "owner_name": "owner",
+        "fuel": "fuel",
+        "pm": "gen",
+        "nameplate_mw": "nameplate_MW",
+        "summer_mw": "summer_MW",
+        "winter_mw": "winter_MW",
+        "latitude": "latitude",
+        "longitude": "longitude",
         }
+    """@private Table mapping `eia.Form860m` columns and index levels to
+    `Fleet` columns"""
 
     def __init__(self,
         state:str|list[str]|None=None,
@@ -159,8 +161,9 @@ class Fleet(pd.DataFrame):
         result = []
         for month in months:
 
-            # read Form 860m data for specified year/month
-            data = Form860m(year=year,month=month,subset="Operating")
+            # read Form 860m data for specified year/month (plant and
+            # generator ids are index levels of `eia.Form860m`)
+            data = Form860m(year=year,month=month,subset="Operating").reset_index()
 
             # remove unwanted columns
             data.drop([x for x in data.columns if x not in self.COLUMNS],axis=1,inplace=True)

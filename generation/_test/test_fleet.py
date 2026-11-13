@@ -32,7 +32,18 @@ def test_columns_and_extra_column_dropped():
     data = Fleet("CA", year=2020, months=8)
     assert list(data.index.names) == INDEX
     assert list(data.columns) == COLUMNS
-    assert "UNIT_CODE" not in data.columns
+
+
+def test_form860m_names_mapped():
+    data = Fleet("CA", "Placer", 2020, months=8)
+    row = data.iloc[0]
+    assert row["region"] == "CISO"
+    assert row["id"] == 34
+    assert row["unit"] == "1P"
+    assert row["name"] == "Plant A"
+    assert row["owner"] == "Owner A"
+    assert row["gen"] == "CT"
+    assert row["nameplate_MW"] == 12.1
 
 
 def test_timestamps_per_month():
