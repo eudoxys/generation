@@ -44,8 +44,12 @@ flowchart LR
    generation of the plant's balancing authority for the category's energy
    source (see `generation.fuels.SHAPES`), normalized to sum to 1 over the
    month. A flat shape is used when the category has no Form 930 code, the
-   balancing authority does not report it, the month is before July 2018, or
-   the monthly Form 930 total is not positive.
+   balancing authority does not report it, or the monthly Form 930 total is
+   not positive. When `eia.Form930Fuel` has no data for the balancing
+   authority and year (e.g., no EIA API key, an unknown balancing authority,
+   or a year before 2019, the first year `eia.Form930Fuel` serves), a
+   `UserWarning` is issued and every category in that balancing authority
+   and year uses the flat shape.
 
 An hourly mean MW equals the MWh in that hour, so the plant columns sum to the
 Form 923 monthly net generation.
@@ -56,9 +60,9 @@ Caveats
   - EIA "state-fuel level increment" estimates (Form 923 plant `99999`) cannot
     be located in a county and are not included.
 
-  - CEMS hourly unit loads, NRC reactor status and the January-June 2018
-    backfill described in `DESIGN.md` are not implemented yet, so those hours
-    use the flat shape.
+  - CEMS hourly unit loads, NRC reactor status and the 2018 backfill
+    described in `DESIGN.md` are not implemented yet, so those hours use the
+    flat shape.
 
   - Net generation can be negative, e.g., storage, and plants whose station
     use exceeds their output.

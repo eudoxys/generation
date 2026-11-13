@@ -29,8 +29,8 @@ Install using `pip`:
     pip install git+https://github.com/eudoxys/generation
 
 Form 930 hourly data requires an EIA API key in `~/.eia/api_key` or
-`EIA_API_KEY`. Without it, or before July 2018, monthly energy is spread
-evenly over the hours of the month.
+`EIA_API_KEY`. Without it, or before 2019, monthly energy is spread evenly
+over the hours of the month and a `UserWarning` is issued.
 
 # Maintenance
 
