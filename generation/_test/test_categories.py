@@ -62,6 +62,41 @@ def test_shaped_by_form930():
     assert data.loc[data.index.hour == 20, "solar_MW"].min() > 0
 
 
+def test_shape_follows_form930():
+    """Issue #53: shapes use `Form930Fuel(year,respondent=ba)` and `{code}_mw`"""
+    # pylint: disable=import-outside-toplevel
+    from generation.category import _shape
+    shape = _shape("BANC", 2020, 1, "SUN")
+    assert abs(shape.sum() - 1) < 1e-9
+    assert shape.idxmax().hour == 20
+    assert shape[shape.index.hour == 8].max() == 0
+    assert FakeForm930Fuel.calls == [("BANC", 2020)]
+
+
+def test_form930_api_change_not_hidden(monkeypatch):
+    """Issue #53: an eia signature change must raise, not give flat shapes"""
+    # pylint: disable=import-outside-toplevel
+    import generation.category
+    def old_signature(year, month=None, *, respondent, refresh=False):
+        raise TypeError("unexpected argument")
+    monkeypatch.setattr(generation.category, "Form930Fuel", old_signature)
+    with pytest.raises(TypeError):
+        generation.category._shape("BANC", 2020, 1, "SUN")
+
+
+def test_fake_form930_matches_eia():
+    """Keep the offline fake in step with the installed `eia.Form930Fuel`"""
+    # pylint: disable=import-outside-toplevel
+    import inspect
+    eia = pytest.importorskip("eia")
+    if eia.Form930Fuel is FakeForm930Fuel:
+        pytest.skip("eia is not installed")
+    real = inspect.signature(eia.Form930Fuel.__init__).parameters
+    fake = inspect.signature(FakeForm930Fuel.__init__).parameters
+    assert list(real) == list(fake)
+    assert [x.kind for x in real.values()] == [x.kind for x in fake.values()]
+
+
 def test_flat_when_no_form930():
     with pytest.warns(UserWarning):
         data = NaturalGas("CA", "Placer", 2020)
