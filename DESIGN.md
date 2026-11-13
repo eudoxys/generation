@@ -277,7 +277,7 @@ cached copy unless `refresh=True`.
 |---|---|
 | 860M generator inventory | `eia.Form860m` ✔ |
 | 923 monthly **by plant** | `eia.Form923(by="plant")`, eudoxys/eia PR #1 (open) |
-| 930 hourly **by fuel** | `eia.Form930Fuel`, eudoxys/eia PR #1 (open); also fixes `Form930` to UTC hour-beginning and allows 2018 |
+| 930 hourly **by fuel** | `eia.Form930Fuel`; API from 2019, Jul–Dec 2018 from the six-month file (eudoxys/eia#51) |
 | CEMS hourly unit load | none; new `generation/cems.py` (EPA CAMPD API) |
 | NRC reactor status | none; new `generation/nrc.py` |
 | county geohash | `fips.Counties().GEOHASH` ✔ (6 chars, unique across all 3,142) |
