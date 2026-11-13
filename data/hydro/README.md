@@ -12,6 +12,15 @@ removal has been applied. The one exception is the added column
 
 Compiled by Yi Lu (Stanford University).
 
+These files are not installed with the `generation` package. Read them with
+`generation.data.Data`, which downloads a file from this repository the
+first time it is used and caches it, e.g.,
+
+```python
+from generation import Data
+dams = Data("hydro/BPA_dams/dam_list.csv")
+```
+
 ## Contents
 
 ```

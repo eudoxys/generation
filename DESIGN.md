@@ -32,6 +32,7 @@ available month.
 | 15 | One module per category; `dispatchable.py` and `nondispatchable.py` combine categories; `total.py` combines both |
 | 16 | Every generation data frame is constructed as `Class(state,county,year)` and returns hourly MW for the county |
 | 17 | A data frame built from other data frames keeps a column for each contributor and adds a total `_MW` column |
+| 18 | Repository `data/` files are not installed with the package; `Data(path)` downloads each file from the repository on first use and caches it |
 
 ## Conventions inherited from `eudoxys/loads`
 
@@ -49,6 +50,7 @@ available month.
 ```
 generation/
   fleet.py          Fleet: unit inventory from EIA-860M, Fleet(state,county,year)
+  data.py           Data: repository data/ file (downloaded and cached), Data(path)
   fuels.py          EIA energy-source/prime-mover codes -> 12 categories,
                     dispatchable split, and 930 shaping code per category
   category.py       Category (plant-built) and Combination (frame-built) base
@@ -258,6 +260,16 @@ Rough sizes (estimates, to confirm on real data):
 - Wide national total: 8,760 × 3,142 ≈ 200+ MB CSV, so `.csv.gz`.
 - The national long table for one year (~4 GB CSV) would hit `.parquet`,
   which is why the long table is partitioned by state.
+
+### Repository data
+
+Curated source data (e.g., `data/hydro/`) is kept in the repository's
+`data/` folder, which is not part of the installed package (decision #18).
+`Data(path,*,refresh=False,**kwargs)` reads `data/{path}` from the
+`eudoxys/generation` repository on GitHub (`Data.BRANCH`, default `main`),
+saves it in the `cache` as `generation/0/data/{path}`, and returns it as a
+data frame (`**kwargs` go to `pandas.read_csv()`). Later calls read the
+cached copy unless `refresh=True`.
 
 ## Dependencies and gaps in sibling packages
 
