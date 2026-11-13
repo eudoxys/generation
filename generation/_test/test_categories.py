@@ -167,3 +167,27 @@ def test_cli_category_month(tmp_path):
 
 def test_cli_hourly_requires_county():
     assert main("2020", "CA", "-D", "total") != E_OK
+
+
+def test_unpublished_months_skipped(monkeypatch):
+    import generation.fleet
+    real = generation.fleet.Form860m
+
+    def form860m(year, month, **kwargs):
+        if month > 8:
+            raise ValueError(f"{year=} {month=} is not published yet")
+        return real(year, month, **kwargs)
+
+    monkeypatch.setattr(generation.fleet, "Form860m", form860m)
+    assert len(Hydro("CA", "Stanislaus", 2020)) == 8784
+
+
+def test_form860m_schema_error_not_hidden(monkeypatch):
+    import generation.fleet
+
+    def form860m(year, month, **kwargs):
+        return pd.DataFrame({"STATE": ["CA"]})
+
+    monkeypatch.setattr(generation.fleet, "Form860m", form860m)
+    with pytest.raises(KeyError):
+        Hydro("CA", "Stanislaus", 2020)

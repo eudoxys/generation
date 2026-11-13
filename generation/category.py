@@ -123,7 +123,11 @@ def _plants(state:str,county:str,year:int) -> tuple[int]:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 data = Fleet(state,county,year,months=month)
-        except Exception as err: # pylint: disable=broad-exception-caught
+        except (ValueError,RuntimeError) as err:
+            # `eia.Form860m` raises `ValueError` for a month not published
+            # yet and `RuntimeError` for a workbook it cannot download or
+            # read; anything else (e.g., a `KeyError` from a schema change)
+            # is a bug and is re-raised
             _logger.debug(f"Form 860m {year=} {month=} not available ({err})")
             continue
         found = True
