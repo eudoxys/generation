@@ -20,6 +20,9 @@ solar = Data("wecc/actual_solar.csv.gz",index_col="timestamp",parse_dates=True)
 | `capacity_{category}.csv.gz` | operating nameplate capacity, MW |
 | `actual_{category}.csv.gz` | net generation, MW (hourly mean MW = MWh in the hour) |
 | `build_wecc.py` | script that builds the files |
+| `node_capacity_{category}.csv.gz` | capacity aggregated to WECC 240 generation nodes, MW (built by `build_nodes.py`) |
+| `node_actual_{category}.csv.gz` | net generation aggregated to WECC 240 generation nodes, MW (built by `build_nodes.py`) |
+| `build_nodes.py` | script that aggregates the county files to WECC 240 nodes |
 
 `{category}` is one of the 12 categories in `generation.fuels.CATEGORIES`:
 `coal`, `natural_gas`, `oil`, `nuclear`, `hydro`, `geothermal`, `biomass`,
@@ -78,10 +81,34 @@ solar = Data("wecc/actual_solar.csv.gz",index_col="timestamp",parse_dates=True)
 - Values can step at the start of a month, because each month's energy is
   Form 923's for that month and the shape is normalized within the month.
 
+## WECC 240 nodes
+
+`build_nodes.py` aggregates the county files to the generation nodes of
+the WECC 240 bus model (`eudoxys/wecc240`). Each county goes to the
+nearest generation node given by the `gen` column of `wecc240`
+`county_node_map.csv`; a node's value is the sum of its counties, so the
+hourly total over the mapped counties is kept. The node files have the
+same `timestamp` rows as the county files and one column per node
+geohash, sorted.
+
+- Counties are matched by `"{county} {ST}"`. Form 860m spellings that
+  differ from the map are corrected (`build_nodes.ALIASES`: `Dona Ana NM`,
+  `Sacremento CA`, and `Oceanside CA`, a city, to `San Diego CA`).
+- Counties not in the map are dropped with a warning that gives the peak
+  MW and energy dropped. With the 2018–2022 files these are mostly wind
+  counties outside the WECC 240 footprint (`Curry`, `Lea` and `Quay NM`;
+  `Brookings`, `Hyde` and `Pennington SD`; `Kimball NE`; `Morton ND`),
+  about 1 GW of wind capacity and 12 TWh, plus Form 860m entries with a
+  wrong state (`Nye AZ`, `Morton NY`), `Denton TX` and `Richland MT`.
+
 ## Rebuild
 
 ```bash
 python data/wecc/build_wecc.py --verbose
+python data/wecc/build_nodes.py --verbose
 ```
+
+`build_nodes.py` reads `county_node_map.csv` from GitHub unless
+`--mapping` names a local copy.
 
 Form 930 for 2019 and later needs an EIA API key (see `eudoxys/eia`).
