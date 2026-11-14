@@ -42,13 +42,24 @@ Sibling Eudoxys dependencies:
 - Index `timestamp`, tz-aware UTC, hour-beginning (decision #2). Power
   columns end in `_MW` (decision #13); an hourly mean MW equals MWh.
 - Net generation can be negative (storage, station use).
-- Missing Form 930 data falls back to a flat monthly shape. When
-  `Form930Fuel` has no data for a BA-year (no API key for 2019 on, unknown
-  BA, year before 2018) a `UserWarning` is issued; a BA that doesn't report a
-  category's code, or a non-positive monthly total, is flat silently. Other
-  errors (e.g., `TypeError` from an `eia` API change) propagate.
+- Missing Form 930 data falls back to a flat monthly shape. Form 930 is
+  read one month at a time (a failed download is retried once); when
+  `Form930Fuel` has no data for a BA-month (no API key for 2019 on, unknown
+  BA, failed download) a `UserWarning` is issued and only that BA-month is
+  flat. Before July 2018, a BA that doesn't report a category's code, or a
+  non-positive monthly total, is flat silently. Other errors (e.g.,
+  `TypeError` from an `eia` API change) propagate.
+- Form 930 shapes are cleaned before use: outlier hours are interpolated
+  (`SPIKE`), negative hours are zero except for storage (`STORAGE`), and a
+  storage month whose values nearly cancel is flat (`CANCEL`). So a
+  non-storage plant is negative only in a month Form 923 reports negative.
+  Plant hours are limited to nameplate capacity (`allocate`), keeping the
+  Form 923 monthly energy.
+- Form 860m spells some counties in more than one way (`Kern`, `KERN`).
+  `Fleet` gives each county one spelling (`generation.fleet.counties`) and
+  matches the `county` argument without regard to case.
 - Category frames are cached as
-  `generation/0/{ST}/{county}/{year}/{category}.csv.gz`; bump
+  `generation/{VERSION}/{ST}/{county}/{year}/{category}.csv.gz`; bump
   `Category.VERSION` when the cached format changes.
 
 ## Style

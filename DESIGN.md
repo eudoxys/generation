@@ -102,7 +102,7 @@ and returns one row per UTC hour-beginning `timestamp` of the year.
 
 A combination keeps the total column of each category it combines and all
 columns of each combination it combines, then adds its own total. Category
-frames are cached on disk (`eudoxys/cache`, `generation/0/{ST}/{county}/{year}/{category}.csv.gz`).
+frames are cached on disk (`eudoxys/cache`, `generation/{VERSION}/{ST}/{county}/{year}/{category}.csv.gz`).
 
 The county-hour-fuel long table, plant flags and wide multi-county tables
 described below are assembled from these per-county frames.

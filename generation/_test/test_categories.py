@@ -1,5 +1,8 @@
 """Tests for the category, dispatchable, non-dispatchable and total data frames"""
 
+import warnings
+
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -160,7 +163,41 @@ def test_total():
 
 def test_form930_loaded_once_per_ba():
     Total("CA", "Stanislaus", 2020)
-    assert FakeForm930Fuel.calls == [("BANC", 2020)]
+    assert FakeForm930Fuel.calls == [("BANC", 2020, x) for x in range(1, 13)]
+
+
+def test_form930_failed_month_is_flat_only_that_month():
+    FakeForm930Fuel.failures = {("BANC", 2020, 3)}
+    with pytest.warns(UserWarning, match="BANC in 2020 month.s. 03"):
+        data = Solar("CA", "Stanislaus", 2020)
+    march = data.loc[data.index.month == 3, "solar_MW"]
+    april = data.loc[data.index.month == 4, "solar_MW"]
+    assert march.nunique() == 1
+    assert april.nunique() > 1
+    assert march.sum() == pytest.approx(5.0 * len(march), rel=1e-6)
+
+
+def test_form930_failed_download_retried(monkeypatch):
+    calls = []
+
+    class Flaky(FakeForm930Fuel):
+        def __init__(self, year, month=None, *, respondent, refresh=False, **kwargs):
+            calls.append((month, refresh))
+            if month == 5 and not refresh:
+                raise RuntimeError("download failed")
+            super().__init__(year, month, respondent=respondent, refresh=refresh, **kwargs)
+
+    monkeypatch.setattr(gc, "Form930Fuel", Flaky)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        profile = gc._profile("BANC", 2020)
+    assert (5, False) in calls and (5, True) in calls
+    assert len(profile) == len(gc.hours(2020))
+
+
+def test_form930_starts_july_2018():
+    gc._profile("BANC", 2018)
+    assert [x[2] for x in FakeForm930Fuel.calls] == list(range(7, 13))
 
 
 def test_makeargs():
@@ -209,3 +246,94 @@ def test_form860m_schema_error_not_hidden(monkeypatch):
     monkeypatch.setattr(generation.fleet, "Form860m", form860m)
     with pytest.raises(KeyError):
         Hydro("CA", "Stanislaus", 2020)
+
+
+def test_clean_removes_spike():
+    index = gc.hours(2020)[:744]
+    values = pd.Series(np.maximum(0, np.cos(2 * np.pi * (index.hour - 20) / 24)) * 100, index=index)
+    values.iloc[300] = 10000.0
+    clean = gc._clean(values)
+    assert clean.max() <= 100.0
+    assert clean.iloc[300] == pytest.approx((values.iloc[299] + values.iloc[301]) / 2)
+
+
+def test_shape_ignores_form930_spike():
+    FakeForm930Fuel.spikes = {("BANC", 2020, 3): 1e6}
+    shape = gc._shape("BANC", 2020, 3, "SUN")
+    assert shape.max() < 0.01
+
+
+def test_shape_flat_when_values_cancel(monkeypatch):
+
+    class Cancel(FakeForm930Fuel):
+        def __init__(self, year, month=None, **kwargs):
+            super().__init__(year, month, **kwargs)
+            self["ps_mw"] = np.where(np.arange(len(self)) % 2, 100.0, -99.0)
+
+    monkeypatch.setattr(gc, "Form930Fuel", Cancel)
+    shape = gc._shape("BANC", 2020, 1, "PS")
+    assert shape.nunique() == 1
+
+
+@pytest.mark.parametrize("code,negative", [("SUN", False), ("OTH", False), ("BAT", True)])
+def test_shape_negative_only_for_storage(monkeypatch, code, negative):
+
+    class Night(FakeForm930Fuel):
+        def __init__(self, year, month=None, **kwargs):
+            super().__init__(year, month, **kwargs)
+            self[f"{code.lower()}_mw"] = np.where(self["sun_mw"] > 0, self["sun_mw"], -1.0)
+
+    monkeypatch.setattr(gc, "Form930Fuel", Night)
+    shape = gc._shape("BANC", 2020, 1, code)
+    assert shape.sum() == pytest.approx(1.0)
+    assert (shape < 0).any() == negative
+
+
+def test_negative_month_stays_negative():
+    shape = gc.allocate(-100.0, np.full(10, 0.1), 50.0)
+    assert (shape == -10.0).all()
+
+
+@pytest.mark.parametrize("energy", [1000.0, -1000.0])
+def test_allocate_limit(energy):
+    shape = np.zeros(100)
+    shape[:5] = 0.2
+    values = gc.allocate(energy, shape, 50.0)
+    assert values.sum() == pytest.approx(energy)
+    assert np.abs(values).max() <= 50.0 + 1e-9
+    assert (np.abs(values[:5]) == 50.0).all()
+
+
+def test_allocate_keeps_shape_within_limit():
+    shape = np.linspace(1, 2, 24)
+    shape /= shape.sum()
+    np.testing.assert_allclose(gc.allocate(240.0, shape, 100.0), 240.0 * shape)
+    np.testing.assert_allclose(gc.allocate(240.0, shape, None), 240.0 * shape)
+
+
+def test_allocate_infeasible_is_flat():
+    values = gc.allocate(1000.0, np.full(10, 0.1), 50.0)
+    np.testing.assert_allclose(values, 100.0)
+
+
+def test_limits():
+    fleet = pd.DataFrame({"month": [1, 1, 2], "plant": [1, 1, 1],
+        "category": ["solar", "battery_storage", "solar"], "nameplate_MW": [10.0, 5.0, 12.0]})
+    limit = gc.limits(fleet)
+    assert limit(1, 1, "solar") == 10.0
+    assert limit(1, 1, "other") == 15.0  # plant total in the month
+    assert limit(1, 3, "solar") == 15.0  # largest monthly total
+    assert limit(2, 1, "solar") is None
+
+
+def test_plant_hours_limited_by_nameplate(monkeypatch):
+    from conftest import ROWS
+    rows = dict(ROWS)
+    rows["nameplate_mw"] = [12.1, 53.5, 10.0, 100.0]  # unlimited peak is 15.7 MW
+    monkeypatch.setattr("conftest.ROWS", rows)
+    data = Solar("CA", "Stanislaus", 2020)
+    assert data["solar_MW"].max() == pytest.approx(10.0, abs=1e-3)
+    assert data.loc[data.index.hour == 8, "solar_MW"].max() == 0  # still dark at night
+    monthly = data["solar_MW"].groupby(data.index.month).sum()
+    hours = pd.Series(data.index.month).value_counts().sort_index()
+    assert monthly.round(2).tolist() == (5.0 * hours).round(2).tolist()
