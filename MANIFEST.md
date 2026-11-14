@@ -99,6 +99,9 @@ Not installed with the package; read with `generation.data.Data`.
 | `data/hydro/README.md` | BPA and WAPA hydro data: sources, columns, time convention | read this, not the data files |
 | `data/hydro/**` | BPA (hourly) and WAPA (monthly, CRSP hourly) federal hydro generation, 2018–2022 | ~50 MB; don't read |
 | `data/wecc/README.md` | WECC county hourly capacity and net generation by category, 2018–2022 | read this, not the data files |
+| `data/wecc/capacity_*.csv.gz` | WECC county hourly operating nameplate capacity by category, MW, 2018–2022 | built by `build_wecc.py`; don't read |
+| `data/wecc/actual_*.csv.gz` | WECC county hourly net generation by category, MW, 2018–2022 | built by `build_wecc.py`; don't read |
+| `data/wecc/node_*.csv.gz` | WECC 240 generation node hourly capacity and net generation by category, MW, 2018–2022 | built by `build_nodes.py`; don't read |
 | `data/wecc/build_wecc.py` | builds the `data/wecc` files from EIA Forms 860m/923/930 | tested by `_test/test_wecc.py`; downloads EIA data |
 | `data/wecc/build_nodes.py` | aggregates the `data/wecc` county files to WECC 240 generation nodes (`wecc240` `county_node_map.csv`) | tested by `_test/test_nodes.py`; reads the map from GitHub |
 | `data/wecc/review_wecc_data.py` | marimo notebook to review WECC county actual and capacity data | Human usage for review of data files |
