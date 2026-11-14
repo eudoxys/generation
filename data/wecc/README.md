@@ -54,8 +54,11 @@ solar = Data("wecc/actual_solar.csv.gz",index_col="timestamp",parse_dates=True)
   county. The monthly totals match Form 923. Form 930 is read one month at a
   time, so a balancing authority month that cannot be read (e.g., a failed
   download) is flat only for that month; the build logs a warning for each
-  one. Outlier hours in the Form 930 data are interpolated, a month whose
-  positive and negative Form 930 values nearly cancel is flat, and each
+  one. Outlier hours in the Form 930 data are interpolated, negative Form
+  930 hours are set to zero except for storage (so a non-storage county is
+  negative only in a month in which Form 923 reports negative net
+  generation for one of its plants), a storage month whose positive and
+  negative Form 930 values nearly cancel is flat, and each
   plant hour is limited to the plant's nameplate capacity with the excess
   moved to other hours of the month, so no county exceeds its capacity
   unless Form 923 reports more energy than the capacity can produce (then

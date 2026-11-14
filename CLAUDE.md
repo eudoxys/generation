@@ -50,7 +50,9 @@ Sibling Eudoxys dependencies:
   non-positive monthly total, is flat silently. Other errors (e.g.,
   `TypeError` from an `eia` API change) propagate.
 - Form 930 shapes are cleaned before use: outlier hours are interpolated
-  (`SPIKE`) and a month whose values nearly cancel is flat (`CANCEL`).
+  (`SPIKE`), negative hours are zero except for storage (`STORAGE`), and a
+  storage month whose values nearly cancel is flat (`CANCEL`). So a
+  non-storage plant is negative only in a month Form 923 reports negative.
   Plant hours are limited to nameplate capacity (`allocate`), keeping the
   Form 923 monthly energy.
 - Form 860m spells some counties in more than one way (`Kern`, `KERN`).

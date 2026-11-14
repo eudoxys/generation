@@ -52,8 +52,10 @@ flowchart LR
    `UserWarning` is issued and every category in that balancing authority
    and month uses the flat shape. Outlier hours in the Form 930 data (more
    than `SPIKE` times the monthly 1st to 99th percentile range beyond that
-   range) are interpolated, and a month whose positive and negative values
-   nearly cancel (`CANCEL`) uses the flat shape.
+   range) are interpolated. Negative values are set to zero except for
+   storage (`STORAGE`), and a storage month whose positive and negative
+   values nearly cancel (`CANCEL`) uses the flat shape. A plant's hours are
+   negative only when its Form 923 monthly net generation is negative.
 
 4. Each plant's hourly MW is limited to its Form 860m nameplate capacity in
    the category and month (`allocate`, `limits`); the excess is moved to the
@@ -249,6 +251,10 @@ SPIKE = 2.0
 """Outlier threshold of a Form 930 hourly value, in multiples of the
 monthly 1st to 99th percentile range beyond that range"""
 
+STORAGE = ["BAT","PS"]
+"""Form 930 energy source codes whose hourly net generation is negative when
+charging; the shapes of other codes use only their non-negative values"""
+
 CANCEL = 0.5
 """Least ratio of the monthly Form 930 total to the total of its absolute
 values for which the hourly values are used as a shape"""
@@ -272,10 +278,13 @@ def _clean(values:pd.Series) -> pd.Series:
 def _shape(ba:str|None,year:int,month:int,code:str|None,refresh:bool=False) -> pd.Series:
     """@private Get the hourly shape of a BA energy source in a month
 
-    The shape sums to 1 over the month. A flat shape is returned when no valid
-    Form 930 data is available, or when the monthly total is not positive or
-    is small compared to the hourly values (positive and negative values that
-    nearly cancel, see `CANCEL`). Outliers are removed first (see `SPIKE`).
+    The shape sums to 1 over the month. Outliers are removed first (see
+    `SPIKE`), and negative values (e.g., solar plant standby load at night)
+    are set to zero except for storage (`STORAGE`), so the shape of a
+    non-storage source is never negative. A flat shape is returned when no
+    valid Form 930 data is available, or when the monthly total is not
+    positive or is small compared to the hourly values (positive and
+    negative storage values that nearly cancel, see `CANCEL`).
     """
     index = hours(year)
     index = index[index.month == month]
@@ -290,6 +299,8 @@ def _shape(ba:str|None,year:int,month:int,code:str|None,refresh:bool=False) -> p
     if values.notna().sum() == 0:
         return flat
     values = _clean(values)
+    if code.upper() not in STORAGE:
+        values = values.clip(lower=0)
     total = values.sum()
     if not np.isfinite(total) or total <= 0 or total < CANCEL * values.abs().sum():
         return flat

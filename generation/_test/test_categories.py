@@ -268,11 +268,30 @@ def test_shape_flat_when_values_cancel(monkeypatch):
     class Cancel(FakeForm930Fuel):
         def __init__(self, year, month=None, **kwargs):
             super().__init__(year, month, **kwargs)
-            self["oth_mw"] = np.where(np.arange(len(self)) % 2, 100.0, -99.0)
+            self["ps_mw"] = np.where(np.arange(len(self)) % 2, 100.0, -99.0)
 
     monkeypatch.setattr(gc, "Form930Fuel", Cancel)
-    shape = gc._shape("BANC", 2020, 1, "OTH")
+    shape = gc._shape("BANC", 2020, 1, "PS")
     assert shape.nunique() == 1
+
+
+@pytest.mark.parametrize("code,negative", [("SUN", False), ("OTH", False), ("BAT", True)])
+def test_shape_negative_only_for_storage(monkeypatch, code, negative):
+
+    class Night(FakeForm930Fuel):
+        def __init__(self, year, month=None, **kwargs):
+            super().__init__(year, month, **kwargs)
+            self[f"{code.lower()}_mw"] = np.where(self["sun_mw"] > 0, self["sun_mw"], -1.0)
+
+    monkeypatch.setattr(gc, "Form930Fuel", Night)
+    shape = gc._shape("BANC", 2020, 1, code)
+    assert shape.sum() == pytest.approx(1.0)
+    assert (shape < 0).any() == negative
+
+
+def test_negative_month_stays_negative():
+    shape = gc.allocate(-100.0, np.full(10, 0.1), 50.0)
+    assert (shape == -10.0).all()
 
 
 @pytest.mark.parametrize("energy", [1000.0, -1000.0])

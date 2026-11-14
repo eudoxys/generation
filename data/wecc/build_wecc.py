@@ -34,8 +34,9 @@ Actual generation follows `generation.category.Category`: each plant's Form
 930 hourly net generation of the plant's balancing authority for that
 category (`generation.fuels.SHAPES`), with a flat shape where Form 930 data
 is unavailable (always for January-June 2018), then summed by county.
-Outlier hours are removed from the Form 930 profile, a profile whose
-positive and negative hours nearly cancel is replaced by a flat shape, and
+Outlier hours are removed from the Form 930 profile, negative hours are set
+to zero except for storage, a storage profile whose positive and negative
+hours nearly cancel is replaced by a flat shape, and
 each plant hour is limited to the plant's nameplate capacity, with the
 excess moved to other hours of the month (`generation.category.allocate`),
 so the monthly totals still match Form 923.
