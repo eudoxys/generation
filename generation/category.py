@@ -50,7 +50,15 @@ flowchart LR
    no data for the balancing authority in a month (e.g., no EIA API key for
    2019 or later, a failed download, or an unknown balancing authority), a
    `UserWarning` is issued and every category in that balancing authority
-   and month uses the flat shape.
+   and month uses the flat shape. Outlier hours in the Form 930 data (more
+   than `SPIKE` times the monthly 1st to 99th percentile range beyond that
+   range) are interpolated, and a month whose positive and negative values
+   nearly cancel (`CANCEL`) uses the flat shape.
+
+4. Each plant's hourly MW is limited to its Form 860m nameplate capacity in
+   the category and month (`allocate`, `limits`); the excess is moved to the
+   other hours of the month in proportion to their shape, so the monthly
+   energy still matches Form 923.
 
 An hourly mean MW equals the MWh in that hour, so the plant columns sum to the
 Form 923 monthly net generation.
@@ -122,15 +130,18 @@ def _check(state:str,county:str,year:int):
         raise ValueError(f"{year=} is before {FIRST_YEAR}")
 
 @functools.cache
-def _plants(state:str,county:str,year:int) -> tuple[int]:
-    """@private Get the ids of the plants in a county in any month of a year"""
-    ids = set()
-    found = False
+def _fleet(state:str,county:str,year:int) -> pd.DataFrame:
+    """@private Get the Form 860m operating generators in a county in a year
+
+    Returns one row per generator-month with columns `month`, `plant`,
+    `category` and `nameplate_MW`.
+    """
+    data = []
     for month in range(1,13):
         try:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                data = Fleet(state,county,year,months=month)
+                fleet = Fleet(state,county,year,months=month)
         except (ValueError,RuntimeError) as err:
             # `eia.Form860m` raises `ValueError` for a month not published
             # yet and `RuntimeError` for a workbook it cannot download or
@@ -138,13 +149,53 @@ def _plants(state:str,county:str,year:int) -> tuple[int]:
             # is a bug and is re-raised
             _logger.debug(f"Form 860m {year=} {month=} not available ({err})")
             continue
-        found = True
-        ids.update(int(x) for x in data["id"])
-    if not found:
+        data.append(pd.DataFrame({
+            "month": month,
+            "plant": [int(x) for x in fleet["id"]],
+            "category": [category(x,y) for x,y in zip(fleet["fuel"],fleet["gen"])],
+            "nameplate_MW": pd.to_numeric(fleet["nameplate_MW"],errors="coerce").values,
+            }))
+    if not data:
         raise RuntimeError(f"no Form 860m data available for {year=}")
+    return pd.concat(data,ignore_index=True)
+
+@functools.cache
+def _plants(state:str,county:str,year:int) -> tuple[int]:
+    """@private Get the ids of the plants in a county in any month of a year"""
+    ids = tuple(sorted(set(_fleet(state,county,year)["plant"])))
     if not ids:
         warnings.warn(f"no generators found in {county} {state} in {year}")
-    return tuple(sorted(ids))
+    return ids
+
+def limits(fleet:pd.DataFrame) -> callable:
+    """Get the hourly MW limit of the plants in a fleet
+
+    Arguments
+    ---------
+
+      - `fleet`: generator-months with columns `month`, `plant`, `category`
+        and `nameplate_MW`
+
+    Returns
+    -------
+
+      - `callable`: `limit(plant,month,category)` gives the plant's
+        nameplate MW in the category and month; when the plant has none
+        (e.g., Form 923 and Form 860m assign its fuel differently), the
+        plant's total nameplate MW in the month, or else its largest monthly
+        total in the year; `None` when the plant is not in the fleet
+    """
+    fleet = fleet.assign(nameplate_MW=pd.to_numeric(fleet["nameplate_MW"],errors="coerce").fillna(0.0))
+    by_category = fleet.groupby(["plant","month","category"])["nameplate_MW"].sum().to_dict()
+    by_month = fleet.groupby(["plant","month"])["nameplate_MW"].sum()
+    by_plant = by_month.groupby("plant").max().to_dict()
+    by_month = by_month.to_dict()
+    def limit(plant:int,month:int,name:str) -> float|None:
+        for value in (by_category.get((plant,month,name)),by_month.get((plant,month)),by_plant.get(plant)):
+            if value is not None and value > 0:
+                return float(value)
+        return None
+    return limit
 
 @functools.cache
 def _monthly(state:str,year:int,refresh:bool=False) -> pd.DataFrame:
@@ -194,11 +245,37 @@ def _profile(ba:str,year:int,refresh:bool=False) -> pd.DataFrame|None:
     data.index = pd.DatetimeIndex(data.index).tz_convert("UTC")
     return data
 
+SPIKE = 2.0
+"""Outlier threshold of a Form 930 hourly value, in multiples of the
+monthly 1st to 99th percentile range beyond that range"""
+
+CANCEL = 0.5
+"""Least ratio of the monthly Form 930 total to the total of its absolute
+values for which the hourly values are used as a shape"""
+
+def _clean(values:pd.Series) -> pd.Series:
+    """@private Remove outliers from a month of Form 930 hourly values
+
+    Values more than `SPIKE` times the 1st to 99th percentile range beyond
+    that range (e.g., a single hour reported as 100 times the monthly peak)
+    are treated as missing, and missing values are interpolated.
+    """
+    low,high = values.quantile(0.01),values.quantile(0.99)
+    margin = SPIKE * (high - low)
+    if np.isfinite(margin) and margin > 0:
+        spikes = (values > high + margin) | (values < low - margin)
+        if spikes.any():
+            _logger.debug(f"removed {spikes.sum()} Form 930 outlier(s) {values[spikes].to_dict()}")
+            values = values.mask(spikes)
+    return values.interpolate(limit_direction="both")
+
 def _shape(ba:str|None,year:int,month:int,code:str|None,refresh:bool=False) -> pd.Series:
     """@private Get the hourly shape of a BA energy source in a month
 
     The shape sums to 1 over the month. A flat shape is returned when no valid
-    Form 930 data is available.
+    Form 930 data is available, or when the monthly total is not positive or
+    is small compared to the hourly values (positive and negative values that
+    nearly cancel, see `CANCEL`). Outliers are removed first (see `SPIKE`).
     """
     index = hours(year)
     index = index[index.month == month]
@@ -212,11 +289,57 @@ def _shape(ba:str|None,year:int,month:int,code:str|None,refresh:bool=False) -> p
     values = profile[column].reindex(index).astype(float)
     if values.notna().sum() == 0:
         return flat
-    values = values.interpolate(limit_direction="both")
+    values = _clean(values)
     total = values.sum()
-    if not np.isfinite(total) or total <= 0:
+    if not np.isfinite(total) or total <= 0 or total < CANCEL * values.abs().sum():
         return flat
     return values / total
+
+def allocate(energy:float,shape:pd.Series|np.ndarray,limit:float|None=None) -> np.ndarray:
+    """Allocate monthly energy to hours by a shape without exceeding a limit
+
+    Arguments
+    ---------
+
+      - `energy`: energy of the month in MWh
+
+      - `shape`: hourly shape of the month (sums to 1)
+
+      - `limit`: largest magnitude of the hourly MW (e.g., the plant
+        nameplate capacity), `None` or not positive for no limit
+
+    Returns
+    -------
+
+      - `np.ndarray`: hourly MW, summing to `energy`
+
+    Hours above the limit are set to the limit and the excess is moved to the
+    other hours in proportion to their shape and remaining headroom. When the
+    energy cannot be delivered within the limit (more than `limit` MW in every
+    hour), the energy is spread evenly over the month.
+    """
+    shape = np.asarray(shape,dtype=float)
+    values = energy * shape
+    if limit is None or not np.isfinite(limit) or limit <= 0:
+        return values
+    count = len(values)
+    if abs(energy) >= limit * count:
+        return np.full(count,energy/count)
+    for _ in range(100):
+        values = np.clip(values,-limit,limit)
+        excess = energy - values.sum()
+        if abs(excess) <= 1e-9 * max(1.0,abs(energy)):
+            return values
+        headroom = (limit - values) if excess > 0 else (values + limit)
+        weight = headroom * np.clip(np.sign(energy) * shape,0,None)
+        if weight.sum() <= 0:
+            weight = headroom
+        values = values + excess * weight / weight.sum()
+    # headroom-proportional allocation always fits within the limit
+    values = np.clip(values,-limit,limit)
+    excess = energy - values.sum()
+    headroom = (limit - values) if excess > 0 else (values + limit)
+    return values + excess * headroom / headroom.sum()
 
 def clear():
     """Clear the data held in memory by generation data frames
@@ -224,6 +347,7 @@ def clear():
     Downloaded and computed data is also cached on disk. Use the `refresh`
     argument of the constructors to refresh the disk cache.
     """
+    _fleet.cache_clear()
     _plants.cache_clear()
     _monthly.cache_clear()
     _profile.cache_clear()
@@ -250,8 +374,9 @@ class Category(pd.DataFrame):
     """Cache folder (`None` uses the `cache` package default)"""
 
     VERSION = 1
-    """Cache version (1: Form 930 shapes read by month, county names
-    matched without regard to case)"""
+    """Cache version (1: Form 930 shapes read by month and cleaned of
+    outliers, county names matched without regard to case, plant hours
+    limited to nameplate capacity)"""
 
     CATEGORY = None
     """Generation category"""
@@ -326,14 +451,15 @@ class Category(pd.DataFrame):
             monthly = monthly.loc[monthly["plant"].isin(plants)
                 & (monthly["category"] == self.CATEGORY)]
             monthly = monthly.groupby(["plant","ba","timestamp"],dropna=False)["gen_mwh"].sum().reset_index()
+            limit = limits(_fleet(state,county,year))
             for plant,rows in monthly.groupby("plant"):
                 values = pd.Series(0.0,index=index)
                 for ba,timestamp,energy in zip(rows["ba"],rows["timestamp"],rows["gen_mwh"]):
                     if pd.isna(energy):
                         continue
-                    shape = _shape(None if pd.isna(ba) else ba,year,
-                        pd.Timestamp(timestamp).month,self.SHAPE,refresh)
-                    values.loc[shape.index] += energy * shape
+                    month = pd.Timestamp(timestamp).month
+                    shape = _shape(None if pd.isna(ba) else ba,year,month,self.SHAPE,refresh)
+                    values.loc[shape.index] += allocate(energy,shape,limit(plant,month,self.CATEGORY))
                 columns[f"plant_{plant}_MW"] = values
         data = pd.DataFrame(columns,index=index)
         data[self.COLUMN] = data.sum(axis=1)

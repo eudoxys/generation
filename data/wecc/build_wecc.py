@@ -22,6 +22,10 @@ Plants are the Form 860m operating generators whose balancing authority is a
 WECC balancing authority (`BAS`). Generators with no balancing authority are
 included when they are in a state that is entirely in WECC (`STATES`).
 
+Generator fields that a Form 860m month lacks (e.g., a column missing from
+an early 2018 workbook) are filled from the same generator in other months
+of the year (`fill`).
+
 Capacity is the sum of the nameplate MW of the operating generators in each
 Form 860m month, held constant over the hours of that month.
 
@@ -30,6 +34,11 @@ Actual generation follows `generation.category.Category`: each plant's Form
 930 hourly net generation of the plant's balancing authority for that
 category (`generation.fuels.SHAPES`), with a flat shape where Form 930 data
 is unavailable (always for January-June 2018), then summed by county.
+Outlier hours are removed from the Form 930 profile, a profile whose
+positive and negative hours nearly cancel is replaced by a flat shape, and
+each plant hour is limited to the plant's nameplate capacity, with the
+excess moved to other hours of the month (`generation.category.allocate`),
+so the monthly totals still match Form 923.
 Form 930 is read one month at a time, so a month that cannot be read is flat
 only for that balancing authority and month; each such month is logged as a
 warning, and the build reports how many there were.
@@ -56,7 +65,7 @@ import pandas as pd
 from eia import Form923
 from generation.fleet import Fleet, counties
 from generation.fuels import CATEGORIES, SHAPES, category
-from generation.category import hours, _shape, PRECISION
+from generation.category import hours, allocate, limits, _shape, PRECISION
 
 _logger = logging.getLogger(__file__)
 
@@ -87,6 +96,38 @@ def merge(names:set[str]) -> dict[str,str]:
     county = pd.Series([x.rsplit(" ",1)[0] for x in names])
     return {x:column(y,z) for x,y,z in zip(names,state,counties(state,county))}
 
+FILL = ["region","county","fuel","gen","nameplate_MW"]
+"""Form 860m generator fields filled from other months of the year when
+missing"""
+
+def fill(fleet:pd.DataFrame,year:int) -> pd.DataFrame:
+    """Fill missing generator fields from the same generator in other months
+
+    Some Form 860m monthly workbooks lack a field for every generator (e.g.,
+    a column the workbook does not have, which `eia.Form860m` reads as blank).
+    Each field in `FILL` that is missing for a generator (plant `id` and
+    `unit`) is taken from the nearest month in the year that has it. A
+    warning is logged for each month in which a field is missing for every
+    generator.
+    """
+    fleet = fleet.copy()
+    month = pd.DatetimeIndex(fleet["timestamp"]).month
+    for name in FILL:
+        values = fleet[name]
+        if name == "nameplate_MW":
+            values = pd.to_numeric(values,errors="coerce")
+        else:
+            values = values.where(values.notna() & (values.astype(str).str.strip() != ""))
+        blank = values.isna().groupby(month).all()
+        for value in blank.index[blank]:
+            _logger.warning(f"Form 860m {year}-{value:02d} has no {name!r} data; "
+                "using the same generators' values in other months")
+        fleet[name] = values
+    fleet = fleet.sort_values("timestamp")
+    keys = [fleet["id"],fleet["unit"].astype(str)]
+    fleet[FILL] = fleet.groupby(keys)[FILL].transform(lambda x:x.ffill().bfill())
+    return fleet.sort_index()
+
 def plants(year:int,months:list[int]|None=None) -> pd.DataFrame:
     """Get the WECC operating generators of a year
 
@@ -105,7 +146,7 @@ def plants(year:int,months:list[int]|None=None) -> pd.DataFrame:
         data.append(fleet)
     if not data:
         raise RuntimeError(f"no Form 860m data for {year}")
-    data = pd.concat(data,ignore_index=True)
+    data = fill(pd.concat(data,ignore_index=True),year)
     ba = data["region"].where(data["region"].notna(),"").astype(str).str.strip()
     wecc = ba.isin(BAS) | ((ba == "") & data["state"].isin(STATES))
     data = data.loc[wecc & data["county"].notna()].copy()
@@ -152,6 +193,7 @@ def actual(fleet:pd.DataFrame,year:int,refresh:bool=False) -> dict[str,pd.DataFr
     monthly["category"] = [category(x,y) for x,y in zip(monthly["fuel"],monthly["pm"])]
     monthly = (monthly.groupby(["category","plant","ba","timestamp"],dropna=False)["gen_mwh"]
         .sum().reset_index())
+    limit = limits(fleet.assign(month=pd.DatetimeIndex(fleet["timestamp"]).month))
     result = {}
     for name in CATEGORIES:
         rows = monthly.loc[monthly["category"] == name]
@@ -159,11 +201,11 @@ def actual(fleet:pd.DataFrame,year:int,refresh:bool=False) -> dict[str,pd.DataFr
         for plant,ba,timestamp,energy in zip(rows["plant"],rows["ba"],rows["timestamp"],rows["gen_mwh"]):
             if pd.isna(energy) or energy == 0:
                 continue
-            shape = _shape(None if pd.isna(ba) else str(ba),year,
-                pd.Timestamp(timestamp).month,SHAPES[name],refresh)
+            month = pd.Timestamp(timestamp).month
+            shape = _shape(None if pd.isna(ba) else str(ba),year,month,SHAPES[name],refresh)
             values = columns.setdefault(where[plant],np.zeros(len(index)))
             start = position[shape.index[0]]
-            values[start:start+len(shape)] += energy * shape.values
+            values[start:start+len(shape)] += allocate(energy,shape,limit(plant,month,name))
         result[name] = pd.DataFrame(columns,index=index)
     return result
 

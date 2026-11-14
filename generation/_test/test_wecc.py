@@ -95,3 +95,32 @@ def test_flat_months_logged(wecc, tmp_path, caplog):
     solar = pd.read_csv(files["actual_solar"], index_col=0, parse_dates=True)["Stanislaus CA"]
     assert solar[solar.index.month == 3].nunique() == 1
     assert solar[solar.index.month == 4].nunique() > 1
+
+
+def test_missing_month_field_filled(wecc, monkeypatch, tmp_path, caplog):
+    import generation.fleet
+    from conftest import FakeForm860m
+
+    class Blank(FakeForm860m):
+        def __init__(self, year, month, **kwargs):
+            super().__init__(year, month, **kwargs)
+            if month <= 7:
+                self["nameplate_mw"] = float("nan")
+                self["ba"] = ""
+
+    monkeypatch.setattr(generation.fleet, "Form860m", Blank)
+    files = wecc.build(2020, 2020, str(tmp_path))
+    assert any("has no 'nameplate_MW' data" in x.getMessage() for x in caplog.records)
+    hydro = pd.read_csv(files["capacity_hydro"], index_col=0)
+    assert (hydro["Stanislaus CA"] == 53.5).all()
+    assert (hydro["King WA"] == 100.0).all()
+
+
+def test_actual_within_capacity(wecc, tmp_path):
+    from conftest import FakeForm930Fuel
+    FakeForm930Fuel.spikes = {("BANC", 2020, 6): 1e6}
+    files = wecc.build(2020, 2020, str(tmp_path))
+    for name in ("solar", "hydro"):
+        actual = pd.read_csv(files[f"actual_{name}"], index_col=0)
+        capacity = pd.read_csv(files[f"capacity_{name}"], index_col=0)
+        assert (actual <= capacity + 1e-3).all().all()

@@ -54,7 +54,15 @@ solar = Data("wecc/actual_solar.csv.gz",index_col="timestamp",parse_dates=True)
   county. The monthly totals match Form 923. Form 930 is read one month at a
   time, so a balancing authority month that cannot be read (e.g., a failed
   download) is flat only for that month; the build logs a warning for each
-  one.
+  one. Outlier hours in the Form 930 data are interpolated, a month whose
+  positive and negative Form 930 values nearly cancel is flat, and each
+  plant hour is limited to the plant's nameplate capacity with the excess
+  moved to other hours of the month, so no county exceeds its capacity
+  unless Form 923 reports more energy than the capacity can produce (then
+  the month is flat).
+- **Missing Form 860m fields.** A generator field a monthly workbook lacks
+  (e.g., early 2018) is taken from the same generator in other months of
+  the year; the build logs a warning for each such month.
 
 ## Caveats
 
@@ -64,6 +72,8 @@ solar = Data("wecc/actual_solar.csv.gz",index_col="timestamp",parse_dates=True)
 - Form 923 state-fuel increment estimates (plant `99999`) cannot be placed
   in a county and are not included.
 - Capacity is nameplate, not summer or winter net capability.
+- Values can step at the start of a month, because each month's energy is
+  Form 923's for that month and the shape is normalized within the month.
 
 ## Rebuild
 
