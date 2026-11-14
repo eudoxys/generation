@@ -96,18 +96,25 @@ class FakeForm930Fuel(pd.DataFrame):
     """Offline stand-in for `eia.Form930Fuel`
 
     Matches the `eia` signature `Form930Fuel(year,month=None,*,respondent)`:
-    indexed by UTC hour-beginning `timestamp`, with lower-case `{code}_mw`
-    columns. BANC reports a diurnal `sun_mw` and a constant `wat_mw`; other
-    respondents raise `ValueError` like an invalid respondent code does.
+    indexed by UTC hour-beginning `timestamp` of the year (or month), with
+    lower-case `{code}_mw` columns. BANC reports a diurnal `sun_mw` and a
+    constant `wat_mw`; other respondents raise `ValueError` like an invalid
+    respondent code does. Months in `failures` raise `RuntimeError` like a
+    failed download does.
     """
 
     calls = []
 
+    failures = set()
+    """(respondent, year, month) that raise `RuntimeError`"""
+
     def __init__(self, year, month=None, *, respondent, fuels=None, raw=False, refresh=False):
-        FakeForm930Fuel.calls.append((respondent, year))
+        FakeForm930Fuel.calls.append((respondent, year, month))
         if respondent != "BANC":
             raise ValueError(f"respondent={respondent!r} is not a valid respondent code")
-        index = pd.DatetimeIndex(hours(year), name="timestamp")
+        if (respondent, year, month) in FakeForm930Fuel.failures:
+            raise RuntimeError(f"unable to download {respondent} {year}-{month}")
+        index = pd.DatetimeIndex(hours(year, month), name="timestamp")
         sun = np.maximum(0, np.cos(2 * np.pi * (index.hour - 20) / 24))  # peak at 20:00Z
         super().__init__({"sun_mw": 100 * sun, "wat_mw": 50.0}, index=index)
 
@@ -133,6 +140,7 @@ def offline(monkeypatch, tmp_path):
     FakeForm860m.calls = []
     FakeForm923.calls = []
     FakeForm930Fuel.calls = []
+    FakeForm930Fuel.failures = set()
     monkeypatch.setattr(generation.fleet, "Form860m", FakeForm860m)
     monkeypatch.setattr(generation.category, "Form923", FakeForm923)
     monkeypatch.setattr(generation.category, "Form930Fuel", FakeForm930Fuel)

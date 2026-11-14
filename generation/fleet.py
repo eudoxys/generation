@@ -31,6 +31,14 @@ which outputs the following
 To select the generators in Kern County CA in August 2020 run the following:
 
     Fleet("CA","Kern",2020,months=8)
+
+County names
+------------
+
+Form 860m spells some counties in more than one way (e.g., `Kern` and
+`KERN`). `Fleet` gives each county one spelling, the most common mixed-case
+spelling in the data, or the title-cased name when the county is only
+spelled in capitals, and selects counties without regard to case.
 """
 
 import logging
@@ -44,6 +52,38 @@ from eia import Form860m
 from geohash import geohash
 
 _logger = logging.getLogger(__file__)
+
+def counties(state:pd.Series,county:pd.Series) -> pd.Series:
+    """Get one spelling for each county name
+
+    Form 860m spells some county names in more than one way, e.g., `Kern`
+    and `KERN`. The spelling used for a county is its most common mixed-case
+    spelling in the data, or the title-cased name when it is only spelled in
+    capitals. Leading and trailing spaces are removed.
+
+    Arguments
+    ---------
+
+      - `state`: state codes
+
+      - `county`: county names (missing values are kept)
+
+    Returns
+    -------
+
+      - `pd.Series`: county names with one spelling per state and county
+    """
+    county = pd.Series([x.strip() if isinstance(x,str) else x for x in county],
+        index=county.index,dtype=object)
+    keys = [(x,y.casefold()) if isinstance(y,str) else None for x,y in zip(state,county)]
+    counts = pd.Series([(x,y) for x,y in zip(keys,county) if x is not None],dtype=object).value_counts()
+    spelling = {}
+    for (key,name),_ in counts.items(): # most common first
+        if key not in spelling or (spelling[key].isupper() and not name.isupper()):
+            spelling[key] = name
+    spelling = {x:(y.title() if y.isupper() else y) for x,y in spelling.items()}
+    return pd.Series([y if x is None else spelling[x] for x,y in zip(keys,county)],
+        index=county.index,dtype=object)
 
 class Fleet(pd.DataFrame):
     """Generation fleet data frame
@@ -155,7 +195,7 @@ class Fleet(pd.DataFrame):
 
         # check states and counties
         states = self._names(state,"state")
-        counties = self._names(county,"county")
+        names = self._names(county,"county")
 
         # compile results
         result = []
@@ -180,16 +220,24 @@ class Fleet(pd.DataFrame):
         # assemble results
         result = pd.concat(result).reset_index()
 
+        # use one spelling for each county (Form 860m mixes, e.g., `Kern`
+        # and `KERN`)
+        result["county"] = counties(result["state"],result["county"])
+
         # drop unwanted states and counties before the geohash calculation;
         # selecting by mask means missing values yield no rows instead of a
-        # KeyError
-        for column,values in {"state":states,"county":counties}.items():
+        # KeyError; counties are matched without regard to case
+        for column,values in {"state":states,"county":names}.items():
             if values is None:
                 continue
-            missing = sorted(set(values) - set(result[column]))
+            fold = (lambda x:x) if column == "state" else (lambda x:x.casefold())
+            found = {fold(x) for x in result[column].dropna()}
+            missing = sorted(x for x in values if fold(x) not in found)
             if missing:
                 warnings.warn(f"no generators found for {column}(s) {', '.join(missing)}")
-            result = result[result[column].isin(values)].copy()
+            wanted = {fold(x) for x in values}
+            result = result[[isinstance(x,str) and fold(x) in wanted
+                for x in result[column]]].copy()
 
         # set geohashes
         result["geohash"] = [

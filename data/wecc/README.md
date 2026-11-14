@@ -29,10 +29,12 @@ solar = Data("wecc/actual_solar.csv.gz",index_col="timestamp",parse_dates=True)
 
 - Rows: `timestamp`, UTC hour-beginning, `2018-01-01 00:00:00+00:00` to
   `2022-12-31 23:00:00+00:00` (43,824 rows).
-- Columns: one per county, named `"{county} {ST}"` as spelled in Form 860m
-  (e.g., `Kern CA`), sorted by state then county. Every file has the same
-  columns: the WECC counties with a generator in any category in any year.
-  A county with no generator in a category is 0.
+- Columns: one per county, named `"{county} {ST}"` (e.g., `Kern CA`),
+  sorted by state then county. Form 860m spells some counties in more than
+  one way (e.g., `Kern` and `KERN`); each county has one column, using its
+  most common mixed-case spelling (`generation.fleet.counties`). Every file
+  has the same columns: the WECC counties with a generator in any category
+  in any year. A county with no generator in a category is 0.
 - Values are rounded to 0.001 MW. Net generation can be negative (storage,
   station use).
 
@@ -49,7 +51,10 @@ solar = Data("wecc/actual_solar.csv.gz",index_col="timestamp",parse_dates=True)
 - **Actual.** Each plant's Form 923 monthly net generation by category,
   shaped into hours by its balancing authority's Form 930 hourly net
   generation for that category (`generation.fuels.SHAPES`), then summed by
-  county. The monthly totals match Form 923.
+  county. The monthly totals match Form 923. Form 930 is read one month at a
+  time, so a balancing authority month that cannot be read (e.g., a failed
+  download) is flat only for that month; the build logs a warning for each
+  one.
 
 ## Caveats
 

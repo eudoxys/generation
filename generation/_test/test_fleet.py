@@ -2,6 +2,7 @@
 
 import gzip
 
+import pandas as pd
 import pytest
 
 from generation import Fleet
@@ -134,3 +135,31 @@ def test_missing_state():
 def test_missing_county():
     with pytest.warns(UserWarning):
         assert len(Fleet("CA", "Kern", 2020, months=8)) == 0
+
+
+def test_county_spelling(monkeypatch):
+    from conftest import ROWS
+    rows = dict(ROWS)
+    rows["county"] = ["Placer", "STANISLAUS", " Stanislaus", "KING"]
+    monkeypatch.setattr("conftest.ROWS", rows)
+    data = Fleet(year=2020, months=8)
+    assert sorted(set(data.index.get_level_values("county"))) == ["King", "Placer", "Stanislaus"]
+
+
+def test_county_filter_ignores_case(monkeypatch):
+    from conftest import ROWS
+    rows = dict(ROWS)
+    rows["county"] = ["Placer", "STANISLAUS", "Stanislaus", "King"]
+    monkeypatch.setattr("conftest.ROWS", rows)
+    data = Fleet("CA", "stanislaus", 2020, months=8)
+    assert sorted(data["id"]) == [151, 152]
+    assert set(data.index.get_level_values("county")) == {"Stanislaus"}
+
+
+def test_counties():
+    from generation.fleet import counties
+    state = pd.Series(["CA", "CA", "CA", "NM", "NM", "WA"])
+    county = pd.Series(["KERN", "Kern", "LOS ANGELES", "MCKINLEY", "McKinley", None])
+    result = counties(state, county).tolist()
+    assert result[:5] == ["Kern", "Kern", "Los Angeles", "McKinley", "McKinley"]
+    assert pd.isna(result[5])

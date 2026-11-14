@@ -84,7 +84,9 @@ What is not promised
 
   - Form 930 hourly shapes for 2019 and later need an EIA API key; without
     one all categories use a flat monthly shape and a `UserWarning` is
-    issued. July-December 2018 needs no key.
+    issued. July-December 2018 needs no key. Form 930 is read one month at a
+    time, so a month that cannot be read is flat only for that balancing
+    authority and month (with a `UserWarning`).
 
   - EIA state-fuel increments (Form 923 plant `99999`) are not located in a
     county and are not included.

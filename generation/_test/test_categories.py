@@ -1,5 +1,7 @@
 """Tests for the category, dispatchable, non-dispatchable and total data frames"""
 
+import warnings
+
 import pandas as pd
 import pytest
 
@@ -160,7 +162,41 @@ def test_total():
 
 def test_form930_loaded_once_per_ba():
     Total("CA", "Stanislaus", 2020)
-    assert FakeForm930Fuel.calls == [("BANC", 2020)]
+    assert FakeForm930Fuel.calls == [("BANC", 2020, x) for x in range(1, 13)]
+
+
+def test_form930_failed_month_is_flat_only_that_month():
+    FakeForm930Fuel.failures = {("BANC", 2020, 3)}
+    with pytest.warns(UserWarning, match="BANC in 2020 month.s. 03"):
+        data = Solar("CA", "Stanislaus", 2020)
+    march = data.loc[data.index.month == 3, "solar_MW"]
+    april = data.loc[data.index.month == 4, "solar_MW"]
+    assert march.nunique() == 1
+    assert april.nunique() > 1
+    assert march.sum() == pytest.approx(5.0 * len(march), rel=1e-6)
+
+
+def test_form930_failed_download_retried(monkeypatch):
+    calls = []
+
+    class Flaky(FakeForm930Fuel):
+        def __init__(self, year, month=None, *, respondent, refresh=False, **kwargs):
+            calls.append((month, refresh))
+            if month == 5 and not refresh:
+                raise RuntimeError("download failed")
+            super().__init__(year, month, respondent=respondent, refresh=refresh, **kwargs)
+
+    monkeypatch.setattr(gc, "Form930Fuel", Flaky)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        profile = gc._profile("BANC", 2020)
+    assert (5, False) in calls and (5, True) in calls
+    assert len(profile) == len(gc.hours(2020))
+
+
+def test_form930_starts_july_2018():
+    gc._profile("BANC", 2018)
+    assert [x[2] for x in FakeForm930Fuel.calls] == list(range(7, 13))
 
 
 def test_makeargs():

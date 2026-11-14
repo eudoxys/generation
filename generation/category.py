@@ -46,10 +46,11 @@ flowchart LR
    month. A flat shape is used when the category has no Form 930 code, the
    balancing authority does not report it, or the monthly Form 930 total is
    not positive, and for January-June 2018 (`eia.Form930Fuel` starts in July
-   2018). When `eia.Form930Fuel` has no data for the balancing authority and
-   year (e.g., no EIA API key for 2019 or later, or an unknown balancing
-   authority), a `UserWarning` is issued and every category in that
-   balancing authority and year uses the flat shape.
+   2018). Form 930 is read one month at a time; when `eia.Form930Fuel` has
+   no data for the balancing authority in a month (e.g., no EIA API key for
+   2019 or later, a failed download, or an unknown balancing authority), a
+   `UserWarning` is issued and every category in that balancing authority
+   and month uses the flat shape.
 
 An hourly mean MW equals the MWh in that hour, so the plant columns sum to the
 Form 923 monthly net generation.
@@ -89,6 +90,9 @@ FIRST_YEAR = 2018
 
 PRECISION = 3
 """Precision of generation data in MW"""
+
+FORM930_FIRST_MONTH = (2018,7)
+"""First year and month of `eia.Form930Fuel` data"""
 
 def hours(year:int) -> pd.DatetimeIndex:
     """Get the UTC hour-beginning timestamps of a year
@@ -160,14 +164,33 @@ def _profile(ba:str,year:int,refresh:bool=False) -> pd.DataFrame|None:
 
     Returns a frame indexed by UTC hour-beginning `timestamp` with one
     `{code}_mw` column per energy source code (lower case), or `None` when
-    the data is not available. Errors other than missing data (e.g.,
-    `TypeError` or `KeyError` from an `eia` API change) are not caught.
+    no month of the year is available. Each month is read separately (a
+    failed download is retried once) so that a month that cannot be read
+    leaves only that month flat. Errors other than missing data (e.g., `TypeError` or `KeyError`
+    from an `eia` API change) are not caught.
     """
-    try:
-        data = Form930Fuel(year,respondent=ba,refresh=refresh)
-    except (ValueError,RuntimeError,OSError) as err:
-        warnings.warn(f"no Form 930 energy source data for {ba} in {year} ({err}); using flat shapes")
+    data = []
+    failed = {}
+    for month in range(1,13):
+        if (year,month) < FORM930_FIRST_MONTH:
+            continue # not published, flat silently
+        try:
+            try:
+                data.append(Form930Fuel(year,month,respondent=ba,refresh=refresh))
+            except (RuntimeError,OSError) as err:
+                # retry a failed download or unreadable cached file once
+                _logger.debug(f"retrying Form 930 {ba} {year}-{month:02d} ({err})")
+                data.append(Form930Fuel(year,month,respondent=ba,refresh=True))
+        except (ValueError,RuntimeError,OSError) as err:
+            failed[month] = err
+    if failed:
+        when = f"{year}" if not data else \
+            f"{year} month(s) {','.join(f'{x:02d}' for x in failed)}"
+        warnings.warn(f"no Form 930 energy source data for {ba} in {when} "
+            f"({list(failed.values())[0]}); using flat shapes")
+    if not data:
         return None
+    data = pd.concat(data)
     data.index = pd.DatetimeIndex(data.index).tz_convert("UTC")
     return data
 
@@ -226,8 +249,9 @@ class Category(pd.DataFrame):
     CACHEDIR = None
     """Cache folder (`None` uses the `cache` package default)"""
 
-    VERSION = 0
-    """Cache version"""
+    VERSION = 1
+    """Cache version (1: Form 930 shapes read by month, county names
+    matched without regard to case)"""
 
     CATEGORY = None
     """Generation category"""

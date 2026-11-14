@@ -30,6 +30,12 @@ Actual generation follows `generation.category.Category`: each plant's Form
 930 hourly net generation of the plant's balancing authority for that
 category (`generation.fuels.SHAPES`), with a flat shape where Form 930 data
 is unavailable (always for January-June 2018), then summed by county.
+Form 930 is read one month at a time, so a month that cannot be read is flat
+only for that balancing authority and month; each such month is logged as a
+warning, and the build reports how many there were.
+
+County names are given one spelling (Form 860m mixes, e.g., `Kern` and
+`KERN`), see `generation.fleet.counties`.
 
 Requirements
 ------------
@@ -48,7 +54,7 @@ import numpy as np
 import pandas as pd
 
 from eia import Form923
-from generation.fleet import Fleet
+from generation.fleet import Fleet, counties
 from generation.fuels import CATEGORIES, SHAPES, category
 from generation.category import hours, _shape, PRECISION
 
@@ -68,6 +74,18 @@ STATES = ["AZ","CA","ID","NV","OR","UT","WA"]
 def column(state:str,county:str) -> str:
     """Get the column name of a county"""
     return f"{county} {state}"
+
+def merge(names:set[str]) -> dict[str,str]:
+    """Get one spelling of each county column name
+
+    Returns a map from each `"{county} {ST}"` name to the one spelling used
+    for that county (see `generation.fleet.counties`), so that columns that
+    differ only by case (e.g., `"KERN CA"` and `"Kern CA"`) are combined.
+    """
+    names = sorted(names)
+    state = pd.Series([x.rsplit(" ",1)[1] for x in names])
+    county = pd.Series([x.rsplit(" ",1)[0] for x in names])
+    return {x:column(y,z) for x,y,z in zip(names,state,counties(state,county))}
 
 def plants(year:int,months:list[int]|None=None) -> pd.DataFrame:
     """Get the WECC operating generators of a year
@@ -94,7 +112,7 @@ def plants(year:int,months:list[int]|None=None) -> pd.DataFrame:
     data["ba"] = ba[data.index]
     data["category"] = [category(x,y) for x,y in zip(data["fuel"],data["gen"])]
     data["plant"] = data["id"].astype(int)
-    data["county"] = data["county"].astype(str).str.strip()
+    data["county"] = counties(data["state"],data["county"])
     data["nameplate_MW"] = pd.to_numeric(data["nameplate_MW"],errors="coerce").fillna(0.0)
     return data[["timestamp","state","county","ba","plant","category","nameplate_MW"]]
 
@@ -169,20 +187,32 @@ def build(start:int=2018,stop:int=2022,output:str=".",refresh:bool=False) -> dic
       - `dict`: file pathname by `"{kind}_{category}"`
     """
     parts = {f"{x}_{y}":[] for x in ("capacity","actual") for y in CATEGORIES}
+    flat = []
     for year in range(start,stop+1):
         _logger.info(f"building {year}")
         fleet = plants(year)
-        for kind,data in (("capacity",capacity(fleet,year)),("actual",actual(fleet,year,refresh))):
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always",UserWarning)
+            hourly = actual(fleet,year,refresh)
+        for warning in caught:
+            _logger.warning(str(warning.message))
+            flat.append(str(warning.message))
+        for kind,data in (("capacity",capacity(fleet,year)),("actual",hourly)):
             for name,frame in data.items():
                 parts[f"{kind}_{name}"].append(frame)
+    if flat:
+        _logger.warning(f"{len(flat)} balancing authority Form 930 problem(s) "
+            "were replaced by flat monthly shapes (see warnings above)")
 
-    # every file has the same columns: all WECC counties with a plant in any year
-    counties = sorted({x for frames in parts.values() for frame in frames for x in frame.columns},
-        key=lambda x:(x.rsplit(" ",1)[1],x))
+    # every file has the same columns: all WECC counties with a plant in any
+    # year, with one spelling for each county across all years
+    names = merge({x for frames in parts.values() for frame in frames for x in frame.columns})
+    columns = sorted(set(names.values()),key=lambda x:(x.rsplit(" ",1)[1],x))
     os.makedirs(output,exist_ok=True)
     result = {}
     for name,frames in parts.items():
-        data = (pd.concat([x.reindex(columns=counties) for x in frames])
+        frames = [x.T.groupby(names).sum().T for x in frames]
+        data = (pd.concat([x.reindex(columns=columns) for x in frames])
             .fillna(0.0).round(PRECISION))
         data.index.name = "timestamp"
         pathname = os.path.join(output,f"{name}.csv.gz")

@@ -64,3 +64,34 @@ def test_wecc_filter(wecc, monkeypatch):
     monkeypatch.setattr("conftest.ROWS", rows)
     fleet = wecc.plants(2020, [1])
     assert sorted(fleet["plant"].unique()) == [34, 152, 900]
+
+
+def test_county_case_merged(wecc, monkeypatch, tmp_path):
+    from conftest import ROWS
+    rows = dict(ROWS)
+    rows["county"] = ["Placer", "STANISLAUS", "Stanislaus", "King"]
+    monkeypatch.setattr("conftest.ROWS", rows)
+    files = wecc.build(2020, 2020, str(tmp_path))
+    for pathname in files.values():
+        data = pd.read_csv(pathname, index_col=0)
+        assert list(data.columns) == ["Placer CA", "Stanislaus CA", "King WA"]
+    solar = pd.read_csv(files["capacity_solar"], index_col=0)
+    hydro = pd.read_csv(files["capacity_hydro"], index_col=0)
+    assert (solar["Stanislaus CA"] == 20.0).all()
+    assert (hydro["Stanislaus CA"] == 53.5).all()
+
+
+def test_merge(wecc):
+    names = wecc.merge({"KERN CA", "Kern CA", "LOS ANGELES CA", "King WA"})
+    assert names == {"KERN CA": "Kern CA", "Kern CA": "Kern CA",
+        "LOS ANGELES CA": "Los Angeles CA", "King WA": "King WA"}
+
+
+def test_flat_months_logged(wecc, tmp_path, caplog):
+    from conftest import FakeForm930Fuel
+    FakeForm930Fuel.failures = {("BANC", 2020, 3)}
+    files = wecc.build(2020, 2020, str(tmp_path))
+    assert any("BANC in 2020 month(s) 03" in x.getMessage() for x in caplog.records)
+    solar = pd.read_csv(files["actual_solar"], index_col=0, parse_dates=True)["Stanislaus CA"]
+    assert solar[solar.index.month == 3].nunique() == 1
+    assert solar[solar.index.month == 4].nunique() > 1
