@@ -24,14 +24,8 @@ def _(mo):
 @app.cell
 def _(datadir, dataset_ui, mo, os):
     _options = {" ".join(x.split("_")[1:]).split(".")[0].title():x for x in sorted(os.listdir(datadir)) if x.startswith(dataset_ui.value)}
-    fuel_ui = mo.ui.dropdown(options=_options,value=list(_options)[0],label="Fuel:")
+    fuel_ui = mo.ui.multiselect(options=_options,value=list(_options),label="Fuel:")
     return (fuel_ui,)
-
-
-@app.cell
-def _(datadir, fuel_ui, pd):
-    data = pd.read_csv(datadir/fuel_ui.value,index_col=[0],parse_dates=[0]).sort_index()
-    return (data,)
 
 
 @app.cell
@@ -49,8 +43,8 @@ def _(data, mo, state_ui):
 
 
 @app.cell
-def _(data, mo):
-    _options = sorted(data.index.year.unique())
+def _(data, mo, pd):
+    _options = sorted(data.index.year.unique()) if data.index.size > 0 else pd.DatetimeIndex([])
     year_ui = mo.ui.dropdown(options=_options,value=None,label="Year:")
     return (year_ui,)
 
@@ -83,10 +77,28 @@ def _(county_ui, data, mo, month_ui, state_ui, year_ui):
     else:
         _data = data.loc[_dtrange][f"{county_ui.value} {state_ui.value}"]
     mo.ui.tabs({
-        "Plot": _data.plot(),
-        "Data": _data,
+        "Plot": mo.mpl.interactive(_data.plot(xlabel="Date/Time (UTC)",ylabel="Power (MW)",grid=True,figsize=(10,7))) if _data.index.size > 0 else mo.md("No result"),
+        "Data": _data if _data.index.size > 0 else mo.md("No result"),
     })
     return
+
+
+@app.cell
+def _(datadir, fuel_ui, mo, pd):
+    with mo.status.progress_bar(title="Reading data...",total=len(fuel_ui.value),remove_on_exit=True) as _bar:
+        data = None
+        for _fuel in fuel_ui.value:
+            _bar.update(subtitle=_fuel)
+            _data = pd.read_csv(datadir/_fuel,index_col=[0],parse_dates=[0]).sort_index()
+            if data is None:
+                data = _data
+            else:
+                data += _data
+        if not data is None:
+            data = data.round(3)
+        else:
+            data = pd.DataFrame()
+    return (data,)
 
 
 @app.cell
