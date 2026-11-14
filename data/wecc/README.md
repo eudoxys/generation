@@ -23,6 +23,7 @@ solar = Data("wecc/actual_solar.csv.gz",index_col="timestamp",parse_dates=True)
 | `node_capacity_{category}.csv.gz` | capacity aggregated to WECC 240 generation nodes, MW (built by `build_nodes.py`) |
 | `node_actual_{category}.csv.gz` | net generation aggregated to WECC 240 generation nodes, MW (built by `build_nodes.py`) |
 | `build_nodes.py` | script that aggregates the county files to WECC 240 nodes |
+| `review_node_data.py` | marimo notebook to review the node files by state or WECC 240 area, year and month |
 
 `{category}` is one of the 12 categories in `generation.fuels.CATEGORIES`:
 `coal`, `natural_gas`, `oil`, `nuclear`, `hydro`, `geothermal`, `biomass`,
@@ -100,6 +101,17 @@ geohash, sorted.
   `Brookings`, `Hyde` and `Pennington SD`; `Kimball NE`; `Morton ND`),
   about 1 GW of wind capacity and 12 TWh, plus Form 860m entries with a
   wrong state (`Nye AZ`, `Morton NY`), `Denton TX` and `Richland MT`.
+
+Review the node files with
+
+```bash
+marimo edit data/wecc/review_node_data.py
+```
+
+from the repository root. Nodes can be selected by state (from the node
+bus county FIPS code) or by WECC 240 area (`BA` column of `wecc240`
+`bus_gis.csv`: `CA`, `NW`, `SW`, `BA` (Basin), `RM` (Rocky Mountain)),
+which is not an EIA balancing authority.
 
 ## Rebuild
 

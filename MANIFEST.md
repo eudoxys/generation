@@ -105,6 +105,7 @@ Not installed with the package; read with `generation.data.Data`.
 | `data/wecc/build_wecc.py` | builds the `data/wecc` files from EIA Forms 860m/923/930 | tested by `_test/test_wecc.py`; downloads EIA data |
 | `data/wecc/build_nodes.py` | aggregates the `data/wecc` county files to WECC 240 generation nodes (`wecc240` `county_node_map.csv`) | tested by `_test/test_nodes.py`; reads the map from GitHub |
 | `data/wecc/review_wecc_data.py` | marimo notebook to review WECC county actual and capacity data | Human usage for review of data files |
+| `data/wecc/review_node_data.py` | marimo notebook to review WECC 240 node actual and capacity data by state or WECC 240 area | Human usage for review of data files; reads `wecc240` `bus_gis.csv` from GitHub |
 
 ## Generated
 
